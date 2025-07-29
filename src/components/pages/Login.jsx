@@ -1,11 +1,41 @@
-import React from "react";
-import { Link } from "react-router-dom";   // ✅ Yeh import add kar
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginRequest, clearError, clearSuccessMessage } from "../../redux/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function Login() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, isAuthenticated, successMessage } = useSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Login form submitted!");
+    dispatch(loginRequest(formData));
   };
+
+  // ✅ Login success hone pe navigate + toast
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast.success("Welcome back!", { position: "top-right" });
+      dispatch(clearSuccessMessage());
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate, dispatch]);
+
+  // ✅ Error aate hi toast show + clear
+  useEffect(() => {
+    if (error) {
+      toast.error(error, { position: "top-right" });
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   return (
     <div className="sm:min-h-screen flex flex-col items-center px-4 sm:px-6 lg:px-8 bg-white pt-10 sm:pt-16 max-sm:pt-28 max-sm:mb-60 max-sm:px-8">
@@ -20,19 +50,19 @@ export default function Login() {
         </p>
       </div>
 
-      {/* ✅ Auth Form */}
-      <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
-        
-        {/* ✅ Username */}
+      {/* ✅ Login Form */}
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
         <div className="w-full">
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1 max-sm:ml-4">
-            Username
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email Address
           </label>
           <input
-            id="username"
-            name="username"
-            type="text"
-            placeholder="Enter your username"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
@@ -41,14 +71,16 @@ export default function Login() {
 
         {/* ✅ Password */}
         <div className="w-full">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1 max-sm:ml-4">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
+            type="password"
             id="password"
             name="password"
-            type="password"
             placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
@@ -58,25 +90,13 @@ export default function Login() {
           </a>
         </div>
 
-        {/* ✅ Remember Me */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700">Remember Me</span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" className="sr-only peer" />
-            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full 
-              after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border 
-              after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3fbf81]">
-            </div>
-          </label>
-        </div>
-
         {/* ✅ Submit Button */}
         <button
           type="submit"
           className="w-full py-3 rounded-full text-lg font-semibold text-white bg-[#3fbf81] 
             hover:bg-[#34a06c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3fbf81] transition-all"
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
 

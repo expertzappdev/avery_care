@@ -1,13 +1,26 @@
 import React, { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/authSlice";  // ✅ logout import kiya
 import Logo from "../assets/AveryCareLogo1.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // ✅ Redux state se check karo user login hai ya nahi
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const isLoginPage = location.pathname === "/login";
   const isSignupPage = location.pathname === "/signup";
+
+  // ✅ Logout Handler
+  const handleLogout = () => {
+    dispatch(logout());          // redux state clear
+    navigate("/login");          // login page bhejo
+  };
 
   return (
     <header className="relative flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 lg:px-10 py-3 bg-white shadow-md">
@@ -30,21 +43,32 @@ const Navbar = () => {
 
         {/* ✅ Buttons */}
         <div className="flex gap-2">
-          {!isLoginPage && (
-            <Link 
-              to="/login" 
-              className="flex items-center justify-center rounded-full h-10 px-4 bg-[#3fbf81] text-white text-sm font-bold hover:bg-[#34a06c]"
+          {isAuthenticated ? (
+            <button 
+              onClick={handleLogout}
+              className="flex items-center justify-center rounded-full h-10 px-4 bg-red-500 text-white text-sm font-bold hover:bg-red-600"
             >
-              Sign In
-            </Link>
-          )}
-          {!isSignupPage && (
-            <Link 
-              to="/signup" 
-              className="flex items-center justify-center rounded-full h-10 px-4 bg-[#eaf1ed] text-[#101815] text-sm font-bold hover:bg-gray-200"
-            >
-              Sign Up
-            </Link>
+              Logout
+            </button>
+          ) : (
+            <>
+              {!isLoginPage && (
+                <Link 
+                  to="/login" 
+                  className="flex items-center justify-center rounded-full h-10 px-4 bg-[#3fbf81] text-white text-sm font-bold hover:bg-[#34a06c]"
+                >
+                  Sign In
+                </Link>
+              )}
+              {!isSignupPage && (
+                <Link 
+                  to="/signup" 
+                  className="flex items-center justify-center rounded-full h-10 px-4 bg-[#eaf1ed] text-[#101815] text-sm font-bold hover:bg-gray-200"
+                >
+                  Sign Up
+                </Link>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -72,7 +96,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* ✅ Dropdown Menu (TOP RIGHT se neeche slide karega) */}
+      {/* ✅ Dropdown Menu (Mobile) */}
       <div
         className={`absolute top-14 right-4 w-[220px] bg-white rounded-2xl shadow-lg border border-gray-200 transform transition-all duration-300 ease-in-out lg:hidden ${
           isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-5 pointer-events-none"
@@ -80,47 +104,40 @@ const Navbar = () => {
       >
         <div className="flex flex-col items-start gap-4 p-5">
           {/* ✅ Links */}
-          <Link 
-            className="text-[#101815] text-base font-medium hover:text-green-600 w-full" 
-            to="/" 
-            onClick={() => setIsMenuOpen(false)}
-          >
-            About
-          </Link>
-          <Link 
-            className="text-[#101815] text-base font-medium hover:text-green-600 w-full" 
-            to="/" 
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Services
-          </Link>
-          <Link 
-            className="text-[#101815] text-base font-medium hover:text-green-600 w-full" 
-            to="/" 
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Contact
-          </Link>
+          <Link className="text-[#101815] text-base font-medium hover:text-green-600 w-full" to="/" onClick={() => setIsMenuOpen(false)}>About</Link>
+          <Link className="text-[#101815] text-base font-medium hover:text-green-600 w-full" to="/" onClick={() => setIsMenuOpen(false)}>Services</Link>
+          <Link className="text-[#101815] text-base font-medium hover:text-green-600 w-full" to="/" onClick={() => setIsMenuOpen(false)}>Contact</Link>
           
           {/* ✅ Auth Buttons */}
           <div className="flex flex-col gap-3 w-full mt-2">
-            {!isLoginPage && (
-              <Link 
-                to="/login" 
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center rounded-full h-10 px-4 bg-[#3fbf81] text-white text-sm font-bold hover:bg-green-500 transition"
+            {isAuthenticated ? (
+              <button 
+                onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                className="flex items-center justify-center rounded-full h-10 px-4 bg-red-500 text-white text-sm font-bold hover:bg-red-600"
               >
-                Sign In
-              </Link>
-            )}
-            {!isSignupPage && (
-              <Link 
-                to="/signup" 
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center rounded-full h-10 px-4 bg-[#eaf1ed] text-[#101815] text-sm font-bold hover:bg-gray-200 transition"
-              >
-                Sign Up
-              </Link>
+                Logout
+              </button>
+            ) : (
+              <>
+                {!isLoginPage && (
+                  <Link 
+                    to="/login" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center rounded-full h-10 px-4 bg-[#3fbf81] text-white text-sm font-bold hover:bg-green-500 transition"
+                  >
+                    Sign In
+                  </Link>
+                )}
+                {!isSignupPage && (
+                  <Link 
+                    to="/signup" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center rounded-full h-10 px-4 bg-[#eaf1ed] text-[#101815] text-sm font-bold hover:bg-gray-200 transition"
+                  >
+                    Sign Up
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>

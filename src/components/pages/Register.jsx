@@ -1,11 +1,54 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { signupRequest, clearSuccessMessage, clearError } from "../../redux/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css'; // ✅ Import CSS
 
 export default function Signup() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, error, successMessage } = useSelector((state) => state.auth);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+  });
+
+  // ✅ Handle change for normal inputs
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // ✅ Phone input handle
+  const handlePhoneChange = (value) => {
+    setFormData({ ...formData, phoneNumber: `+${value}` }); 
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Signup form submitted!");
+    dispatch(signupRequest(formData));
   };
+
+  // ✅ Success toast + redirect
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage, { position: "top-right" });
+      dispatch(clearSuccessMessage());
+      navigate("/login");
+    }
+  }, [successMessage, dispatch, navigate]);
+
+  // ✅ Error toast
+  useEffect(() => {
+    if (error) {
+      toast.error(error, { position: "top-right" });
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   return (
     <div className="sm:min-h-screen flex flex-col items-center px-4 sm:px-6 lg:px-8 bg-white pt-6 max-sm:mb-40 max-sm:px-8">
@@ -20,19 +63,21 @@ export default function Signup() {
         </p>
       </div>
 
-      {/* ✅ Auth Form */}
+      {/* ✅ Signup Form */}
       <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
-        
-        {/* ✅ Username */}
+
+        {/* ✅ Name */}
         <div className="w-full">
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1 max-sm:ml-4">
-            Username
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
           </label>
           <input
-            id="username"
-            name="username"
+            id="name"
+            name="name"
             type="text"
-            placeholder="Enter your username"
+            placeholder="Enter your name"
+            value={formData.name}
+            onChange={handleChange}
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
@@ -41,7 +86,7 @@ export default function Signup() {
 
         {/* ✅ Email */}
         <div className="w-full">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1 max-sm:ml-4">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
           </label>
           <input
@@ -49,15 +94,42 @@ export default function Signup() {
             name="email"
             type="email"
             placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
           />
         </div>
 
+        {/* ✅ Phone (with country code dropdown) */}
+        <div className="w-full">
+          <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number
+          </label>
+          <PhoneInput
+            country={"in"} // default India
+            value={formData.phoneNumber}
+            onChange={handlePhoneChange}
+            inputStyle={{
+              width: "100%",
+              height: "48px",
+              borderRadius: "8px",
+              border: "1px solid #d1d5db",
+              fontSize: "16px",
+              paddingLeft: "60px"
+            }}
+            buttonStyle={{
+              borderRadius: "8px 0 0 8px",
+              border: "1px solid #d1d5db",
+              padding:"0 5px 0",
+            }}
+          />
+        </div>
+
         {/* ✅ Password */}
         <div className="w-full">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1 max-sm:ml-4">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
@@ -65,25 +137,11 @@ export default function Signup() {
             name="password"
             type="password"
             placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
             required
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
-          />
-        </div>
-
-        {/* ✅ Confirm Password */}
-        <div className="w-full">
-          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1 max-sm:ml-4">
-            Confirm Password
-          </label>
-          <input
-            id="confirm-password"
-            name="confirm-password"
-            type="password"
-            placeholder="Confirm your password"
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
-              focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition "
           />
         </div>
 
@@ -93,7 +151,7 @@ export default function Signup() {
           className="w-full py-3 rounded-full text-lg font-semibold text-white bg-[#3fbf81] 
             hover:bg-[#34a06c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3fbf81] transition-all"
         >
-          Sign Up
+          {loading ? "Signing Up..." : "Sign Up"}
         </button>
       </form>
 
