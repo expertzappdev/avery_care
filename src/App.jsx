@@ -1,19 +1,13 @@
 import React from "react";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Testimonials from "./components/Testimonials";
-import CTA from "./components/CTA";
 import Footer from "./components/Footer";
-import FeatureSection from "./components/FeatureSection";
+import Home from "./components/pages/Home";
 
 function App() {
   return (
     <div className="bg-[#f9fbfa]">
       <Navbar />
-      <Hero />
-      <FeatureSection />
-      <Testimonials />
-      <CTA />
+      <Home/>
       <Footer />
     </div>
   );

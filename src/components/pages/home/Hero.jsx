@@ -1,6 +1,6 @@
 // Hero Component
 import React from "react";
-import bannerImage from "../assets/bannerimageHome.png";
+import bannerImage from "../../../assets/bannerImageHome.png";
 const Hero = () => {
   return (
     // REMOVED bottom padding to reduce gap below
@@ -15,12 +15,12 @@ const Hero = () => {
                 backgroundImage: `url(${bannerImage})`,
               }}
             >
-              <div className="flex flex-col gap-4 max-w-3xl mt-20">
-                <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tighter">
+              <div className="flex flex-col gap-4 max-w-3xl">
+                <h1 className="text-white text-3xl sm:text-4xl lg:text-6xl font-black leading-tight tracking-tighter mt-20">
                   Your AI-Powered Healthcare Companion
                 </h1>
                 <h2 className="text-white/90 text-base sm:text-lg lg:text-xl font-normal max-w-2xl mx-auto">
-                  AveryHealth provides supportive, AI-driven phone calls to help you manage your health and well-being. Schedule and conduct calls with ease.
+                  AveryCare provides supportive, AI-driven phone calls to help you manage your health and well-being. Schedule and conduct calls with ease.
                 </h2>
               </div>
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4 justify-center">
