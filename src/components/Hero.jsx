@@ -15,7 +15,7 @@ const Hero = () => {
                 backgroundImage: `url(${bannerImage})`,
               }}
             >
-              <div className="flex flex-col gap-4 max-w-3xl mt-15">
+              <div className="flex flex-col gap-4 max-w-3xl mt-20">
                 <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tighter">
                   Your AI-Powered Healthcare Companion
                 </h1>
