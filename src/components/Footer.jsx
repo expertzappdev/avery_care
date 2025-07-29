@@ -12,7 +12,7 @@ const Footer = () => {
           <a className="text-[#101815] hover:text-[#3fbf81] transition text-sm font-medium" href="#">Privacy Policy</a>
         </div>
         <p className="text-[#101815] text-sm text-center">
-          © {new Date().getFullYear()} AveryHealth. All rights reserved.
+          © {new Date().getFullYear()} AveryCare. All rights reserved.
         </p>
       </div>
     </footer>

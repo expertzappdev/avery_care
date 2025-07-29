@@ -4,7 +4,7 @@ const Testimonials = () => {
   const testimonials = [
     {
       img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBDbgbd-04tx5i51Q9onE-j5mnFcOdQTToz8ddUMu05baUqZkVjJPykenm_DDZ9NRf7EPq-H1w2hqR2OddTKJoKT9Aa2R6n13b_G9VoykSxrF5-IoXCMu8uiZScMUpv_SgGolxA79npvEfBV16RVP9--YH4PL8igw-sBklMhiL9Wa2bjj7dtut9SxAdwGdoEiVdowkWiPVbhkVes1dtPn4XOYG7r5_aNa3gH1avvfXabrZg4VC9sbfihFtnoxoht-3ea90gheA1--k",
-      quote: "AveryHealth has been a game-changer for our family. It helps us stay connected and informed about our loved one’s health.",
+      quote: "AveryCare has been a game-changer for our family. It helps us stay connected and informed about our loved one’s health.",
       name: "The Smiths",
     },
     {

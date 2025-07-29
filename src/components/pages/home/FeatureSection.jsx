@@ -27,7 +27,7 @@ const FeatureSection = () => {
             Care, Simplified.
           </h1>
           <p className="text-[#101815] text-base sm:text-lg leading-normal max-w-3xl mx-auto md:mx-0 mt-2">
-            AveryHealth offers a suite of features designed to simplify your healthcare journey.
+            AveryCare offers a suite of features designed to simplify your healthcare journey.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
