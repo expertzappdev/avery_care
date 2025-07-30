@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"; //   navigation ke liye import
 
 const CTA = () => {
   return (
-    <section className="flex justify-center py-12 sm:py-16 md:py-20">
+    <section className="flex justify-center py-12 sm:py-12 md:py-12">
       <div className="w-full max-w-4xl flex flex-col justify-center items-center gap-6 px-4 text-center">
         <h1 className="text-[#101815] text-3xl sm:text-4xl font-bold leading-tight">
           Ready to experience the future of healthcare?

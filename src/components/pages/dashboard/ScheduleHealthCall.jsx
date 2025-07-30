@@ -22,13 +22,13 @@ export default function ScheduleHealthCall() {
   };
 
   return (
-    <div className="flex flex-col px-5 sm:px-8 lg:px-12  pb-12 min-h-screen bg-white space-y-12">
+    <div className="flex flex-col px-5 sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
       
       {/* ✅ Page Title */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Schedule Health Call</h1>
-        <p className="text-gray-500">
-          Schedule an <span className="text-green-600 font-semibold">AI-powered</span> health check call for a family member.
+        <p className="text-gray-600">
+          Schedule an <span className="text-[#3fbf81] font-semibold">AI-powered</span> health check call for a family member.
         </p>
       </div>
 
@@ -37,14 +37,14 @@ export default function ScheduleHealthCall() {
         
         {/* Family Member Dropdown */}
         <div>
-          <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-green-600" />
+          <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
+            <UserIcon className="w-5 h-5 text-[#3fbf81]" />
             Select Family Member
           </label>
           <select
             value={selectedMember}
             onChange={(e) => setSelectedMember(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-green-300 transition"
+            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
           >
             <option value="">Choose a family member</option>
             {familyMembers.map((member, index) => (
@@ -55,29 +55,29 @@ export default function ScheduleHealthCall() {
 
         {/* Date Picker */}
         <div>
-          <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-            <CalendarDaysIcon className="w-5 h-5 text-green-600" />
+          <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
+            <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
             Select Date
           </label>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-green-300 transition"
+            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
           />
         </div>
 
         {/* Time Picker */}
         <div>
-          <label className="block font-medium mb-2 text-gray-700 flex items-center gap-2">
-            <ClockIcon className="w-5 h-5 text-green-600" />
+          <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
+            <ClockIcon className="w-5 h-5 text-[#3fbf81]" />
             Select Time
           </label>
           <input
             type="time"
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-green-300 transition"
+            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
           />
         </div>
 
@@ -85,7 +85,7 @@ export default function ScheduleHealthCall() {
         <div className="flex justify-center mt-6">
           <button
             onClick={handleSchedule}
-            className="flex items-center gap-2 px-8 py-3 bg-green-500 text-white font-semibold rounded-full hover:bg-green-600 transition"
+            className="flex items-center gap-2 px-8 py-3 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105 shadow-md"
           >
             <PhoneArrowUpRightIcon className="w-5 h-5" />
             Schedule Health Call
@@ -98,12 +98,12 @@ export default function ScheduleHealthCall() {
         <h2 className="text-xl font-semibold mb-4">Call Preview</h2>
 
         {/* ✅ White Card Style */}
-        <div className="border border-gray-200 rounded-xl bg-white p-6 space-y-5">
+        <div className="border border-gray-200 rounded-xl bg-white p-6 space-y-5 shadow-sm">
           
           {/* Member */}
           <div className="flex items-center gap-4">
-            <div className="bg-gray-100 p-3 rounded-full">
-              <UserIcon className="w-7 h-7 text-gray-700" />
+            <div className="bg-[#eafaf3] p-3 rounded-full">
+              <UserIcon className="w-7 h-7 text-[#3fbf81]" />
             </div>
             <p className="text-gray-700 text-lg">
               <strong>Family Member:</strong> {selectedMember || "Not selected"}
@@ -112,8 +112,8 @@ export default function ScheduleHealthCall() {
 
           {/* Date */}
           <div className="flex items-center gap-4">
-            <div className="bg-gray-100 p-3 rounded-full">
-              <CalendarDaysIcon className="w-7 h-7 text-gray-700" />
+            <div className="bg-[#eafaf3] p-3 rounded-full">
+              <CalendarDaysIcon className="w-7 h-7 text-[#3fbf81]" />
             </div>
             <p className="text-gray-700 text-lg">
               <strong>Date:</strong> {selectedDate || "Not selected"}
@@ -122,8 +122,8 @@ export default function ScheduleHealthCall() {
 
           {/* Time */}
           <div className="flex items-center gap-4">
-            <div className="bg-gray-100 p-3 rounded-full">
-              <ClockIcon className="w-7 h-7 text-gray-700" />
+            <div className="bg-[#eafaf3] p-3 rounded-full">
+              <ClockIcon className="w-7 h-7 text-[#3fbf81]" />
             </div>
             <p className="text-gray-700 text-lg">
               <strong>Time:</strong> {selectedTime || "Not selected"}

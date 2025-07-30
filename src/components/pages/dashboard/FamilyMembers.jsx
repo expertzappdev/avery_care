@@ -30,8 +30,8 @@ export default function FamilyMembers() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row pl-10 gap-10 min-h-screen bg-white">
-
+    <div className="flex flex-col md:flex-row px-5 sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
+      
       {/* ✅ LEFT: FORM SECTION */}
       <div className="flex-1 rounded-xl space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
@@ -53,16 +53,16 @@ export default function FamilyMembers() {
                 value={formData[field.name]}
                 onChange={handleChange}
                 placeholder={field.placeholder}
-                className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-green-400 transition"
+                className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] transition"
               />
             </div>
           ))}
 
-          {/* ✅ Add Button in Center */}
+          {/* ✅ Add Button */}
           <div className="flex justify-center mt-6">
             <button
               onClick={handleAddMember}
-              className="flex items-center gap-2 px-6 py-2 bg-green-500 text-white font-medium rounded-full hover:bg-green-600 transition text-sm sm:text-base"
+              className="flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base"
             >
               <UserPlusIcon className="w-5 h-5" />
               Add Family Member
@@ -72,7 +72,7 @@ export default function FamilyMembers() {
       </div>
 
       {/* ✅ RIGHT: FAMILY MEMBERS LIST */}
-      <div className="flex-1 mt-8 rounded-xl">
+      <div className="flex-1 mt-4 md:mt-0 rounded-xl">
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           Added Family Members
         </h2>
@@ -84,7 +84,7 @@ export default function FamilyMembers() {
             {familyList.map((member, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between py-4 hover:bg-gray-100 px-2 rounded-lg transition"
+                className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
               >
                 <div>
                   <p className="font-medium text-lg text-gray-900">{member.name}</p>
@@ -92,8 +92,8 @@ export default function FamilyMembers() {
                 </div>
 
                 {/* ✅ Edit Icon */}
-                <button className="p-2 hover:bg-gray-200 rounded-full transition">
-                  <PencilIcon className="h-5 w-5 text-gray-600 hover:text-green-700" />
+                <button className="p-2 hover:bg-gray-100 rounded-full transition">
+                  <PencilIcon className="h-5 w-5 text-gray-600 hover:text-[#3fbf81]" />
                 </button>
               </div>
             ))}

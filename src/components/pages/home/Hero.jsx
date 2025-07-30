@@ -5,7 +5,7 @@ import bannerImage from "../../../assets/bannerImageHome.png";
 
 const Hero = () => {
   return (
-    <div className="px-4 sm:px-6 lg:px-5 pt-10 sm:pt-13 md:pt-15">
+    <div className="px-4 sm:px-6 lg:px-5 sm:pt-8">
       <div className="layout-content-container flex flex-col max-w-6xl mx-auto">
         <div className="@container">
           <div className="w-full">
