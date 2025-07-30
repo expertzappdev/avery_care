@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom"; // ✅ navigation ke liye import
 
 const CTA = () => {
   return (
@@ -10,15 +11,19 @@ const CTA = () => {
         <p className="text-[#101815] text-base sm:text-lg font-normal max-w-2xl">
           Join AveryCare today and take control of your health and well-being.
         </p>
+
+        {/* ✅ Button with Link */}
         <div className="flex justify-center mt-4">
-          <button className="flex min-w-[120px] items-center justify-center rounded-full h-12 px-6 bg-[#3fbf81] text-[#101815] text-base font-bold hover:bg-green-500 transition-transform transform hover:scale-105">
+          <Link 
+            to="/signup" 
+            className="flex min-w-[120px] items-center justify-center rounded-full h-12 px-6 bg-[#3fbf81] text-[#101815] text-base font-bold hover:bg-[#34a06c] transition-transform transform hover:scale-105"
+          >
             Get Started
-          </button>
+          </Link>
         </div>
       </div>
     </section>
   );
 };
-
 
 export default CTA;
