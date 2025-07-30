@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Logo from "../assets/AveryCareLogo1.png"; // ✅ Apni image import karo (correct path use karo)
+import Logo from "../assets/AveryCareLogo1.png"; 
 
 // SVG Icon for the hamburger menu
 const MenuIcon = (props) => (
