@@ -5,9 +5,9 @@ import {
   signupRequest, signupSuccess, signupFailure
 } from "./authSlice";
 
-const API_URL = "http://192.168.10.156:5000/api/auth";
+const API_URL = "http://192.168.43.34:5000/api/auth";
 
-// ✅ API Calls
+// API Calls
 function loginApi(payload) {
   return axios.post(`${API_URL}/login`, payload);
 }
@@ -15,7 +15,7 @@ function signupApi(payload) {
   return axios.post(`${API_URL}/register`, payload);
 }
 
-// ✅ LOGIN Saga
+// LOGIN Saga
 function* handleLogin(action) {
   try {
     const response = yield call(loginApi, action.payload);
@@ -25,7 +25,7 @@ function* handleLogin(action) {
   }
 }
 
-// ✅ SIGNUP Saga
+// SIGNUP Saga
 function* handleSignup(action) {
   try {
     const response = yield call(signupApi, action.payload);
@@ -35,13 +35,13 @@ function* handleSignup(action) {
   }
 }
 
-// ✅ Watcher Saga
+// Watcher Saga
 function* watchAuth() {
   yield takeLatest(loginRequest.type, handleLogin);
   yield takeLatest(signupRequest.type, handleSignup);
 }
 
-// ✅ Root Saga
+// Root Saga
 export default function* rootSaga() {
   yield all([watchAuth()]);
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom"; // ✅ navigation ke liye import
+import { Link } from "react-router-dom"; //   navigation ke liye import
 
 const CTA = () => {
   return (
@@ -12,7 +12,7 @@ const CTA = () => {
           Join AveryCare today and take control of your health and well-being.
         </p>
 
-        {/* ✅ Button with Link */}
+        {/*   Button with Link */}
         <div className="flex justify-center mt-4">
           <Link 
             to="/signup" 

@@ -4,7 +4,7 @@ import { signupRequest, clearSuccessMessage, clearError } from "../../redux/auth
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PhoneInput from "react-phone-input-2";
-import 'react-phone-input-2/lib/style.css'; // ✅ Import CSS
+import 'react-phone-input-2/lib/style.css'; //   Import CSS
 
 export default function Signup() {
   const dispatch = useDispatch();
@@ -18,12 +18,12 @@ export default function Signup() {
     password: "",
   });
 
-  // ✅ Handle change for normal inputs
+  //   Handle change for normal inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Phone input handle
+  //   Phone input handle
   const handlePhoneChange = (value) => {
     setFormData({ ...formData, phoneNumber: `+${value}` }); 
   };
@@ -33,7 +33,7 @@ export default function Signup() {
     dispatch(signupRequest(formData));
   };
 
-  // ✅ Success toast + redirect
+  //   Success toast + redirect
   useEffect(() => {
     if (successMessage) {
       toast.success(successMessage, { position: "top-right" });
@@ -42,7 +42,7 @@ export default function Signup() {
     }
   }, [successMessage, dispatch, navigate]);
 
-  // ✅ Error toast
+  //   Error toast
   useEffect(() => {
     if (error) {
       toast.error(error, { position: "top-right" });
@@ -53,7 +53,7 @@ export default function Signup() {
   return (
     <div className="sm:min-h-screen flex flex-col items-center px-4 sm:px-6 lg:px-8 bg-white pt-6 max-sm:mb-40 max-sm:px-8">
       
-      {/* ✅ Title Section */}
+      {/*   Title Section */}
       <div className="text-center mb-8 max-sm:mt-20">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
           Create an Account
@@ -63,10 +63,10 @@ export default function Signup() {
         </p>
       </div>
 
-      {/* ✅ Signup Form */}
+      {/*   Signup Form */}
       <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
 
-        {/* ✅ Name */}
+        {/*   Name */}
         <div className="w-full">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name
@@ -84,7 +84,7 @@ export default function Signup() {
           />
         </div>
 
-        {/* ✅ Email */}
+        {/*   Email */}
         <div className="w-full">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
@@ -102,7 +102,7 @@ export default function Signup() {
           />
         </div>
 
-        {/* ✅ Phone (with country code dropdown) */}
+        {/*   Phone (with country code dropdown) */}
         <div className="w-full">
           <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
             Phone Number
@@ -127,7 +127,7 @@ export default function Signup() {
           />
         </div>
 
-        {/* ✅ Password */}
+        {/*   Password */}
         <div className="w-full">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
@@ -145,7 +145,7 @@ export default function Signup() {
           />
         </div>
 
-        {/* ✅ Submit Button */}
+        {/*   Submit Button */}
         <button
           type="submit"
           className="w-full py-3 rounded-full text-lg font-semibold text-white bg-[#3fbf81] 
@@ -155,7 +155,7 @@ export default function Signup() {
         </button>
       </form>
 
-      {/* ✅ Login Link */}
+      {/*   Login Link */}
       <div className="mt-6 text-center text-sm text-gray-700">
         Already have an account?{" "}
         <Link to="/login" className="font-semibold text-[#3fbf81] hover:underline">
