@@ -32,7 +32,7 @@ const FeatureSection = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="flex flex-col gap-4 rounded-xl border border-[#d4e2dc] bg-[#f9fbfa] p-6 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+            <div key={index} className="flex flex-col gap-4 rounded-xl border border-[#d4e2dc] p-6 transition-transform transform hover:-translate-y-1 hover:shadow-lg">
               <div className="text-green-600">
                 {feature.icon}
               </div>

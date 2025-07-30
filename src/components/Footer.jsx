@@ -2,7 +2,7 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="flex justify-center bg-[#f9fbfa] border-t border-gray-200">
+    <footer className="flex justify-center border-t border-gray-200">
       <div className="w-full max-w-6xl px-6 py-10 mx-auto">
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-6">
           <a className="text-[#101815] hover:text-[#3fbf81] transition text-sm font-medium" href="#">Contact Us</a>
