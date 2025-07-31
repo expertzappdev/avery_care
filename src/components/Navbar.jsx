@@ -15,7 +15,7 @@ const Navbar = () => {
 
   const { isAuthenticated } = useSelector((state) => state.auth);
 
-  // ✅ Dummy user info (replace with redux data later)
+  //   Dummy user info (replace with redux data later)
   const userEmail = "anuj@example.com";
   const userPhone = "+91 9876543210";
 
@@ -30,9 +30,9 @@ const Navbar = () => {
   return (
     <header className="relative flex items-center justify-between border-b border-gray-200 px-4 sm:px-6 lg:px-10 py-3 bg-white shadow-md">
 
-      {/* ✅ Logo */}
+      {/*   Logo */}
       <Link
-        to={isAuthenticated ? "/dashboard" : "/"}
+        to={ "/"}
         className="flex items-center gap-3 cursor-pointer"
       >
         <img src={Logo} alt="AveryCare Logo" className="w-10 h-10 object-contain" />
@@ -41,20 +41,20 @@ const Navbar = () => {
         </h2>
       </Link>
 
-      {/* ✅ Desktop Navigation */}
+      {/*   Desktop Navigation */}
       <div className="hidden lg:flex flex-1 justify-end gap-8 items-center">
         {isAuthenticated ? (
           <>
-            <Link className="text-[#101815] hover:text-[#34a06c]" to="/dashboard">Home</Link>
-            <Link className="text-[#101815] hover:text-[#34a06c]" to="/history">My Calls</Link>
-            <Link className="text-[#101815] hover:text-[#34a06c]" to="/resources">Resources</Link>
+            <Link className="text-[#101815] hover:text-[#34a06c]" to="/dashboard">Dashboard</Link>
+            <Link className="text-[#101815] hover:text-[#34a06c]" to="/history">All Calls</Link>
+            <Link className="text-[#101815] hover:text-[#34a06c]" to="/settings">Settings</Link>
 
-            {/* ✅ Help Icon */}
+            {/*   Help Icon */}
             <button className="text-[#101815] hover:text-[#34a06c]">
               <QuestionMarkCircleIcon className="w-6 h-6" />
             </button>
 
-            {/* ✅ Profile Dropdown */}
+            {/*   Profile Dropdown */}
             <div className="relative">
               <div
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -66,34 +66,34 @@ const Navbar = () => {
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-[210px] bg-white rounded-xl shadow-lg border border-gray-200 z-50 p-4 text-left space-y-3">
 
-                  {/* ✅ My Info Heading with underline */}
+                  {/*   My Info Heading with underline */}
                   <div>
                     <h3 className="text-sm font-semibold ml-2 text-gray-800 ">My Info</h3>
                     <div className="w-full border-b border-gray-300 mt-2"></div>
                   </div>
 
-                  {/* ✅ Email */}
+                  {/*   Email */}
                   <div className="flex items-center ml-2 gap-2 text-gray-700 text-sm">
                     <EnvelopeIcon className="w-4 h-4 text-gray-500" />
                     <span>{userEmail}</span>
                   </div>
 
-                  {/* ✅ Phone */}
+                  {/*   Phone */}
                   <div className="flex items-center ml-2 gap-2 text-gray-700 text-sm">
                     <PhoneIcon className="w-4 h-4 text-gray-500" />
                     <span>{userPhone}</span>
                   </div>
 
-                  {/* ✅ Verified Badge */}
+                  {/*   Verified Badge */}
                   <div className="flex items-center ml-2 gap-1 text-green-600 text-xs font-medium">
                     <CheckBadgeIcon className="w-4 h-4" />
                     <span>Verified</span>
                   </div>
 
-                  {/* ✅ Logout */}
+                  {/*   Logout */}
                   <button
                     onClick={handleLogout}
-                    className="text-red-500 text-sm ml-2 font-medium hover:underline"
+                    className="bg-[#3FBF81] hover:bg-[#36a973] text-white px-4 py-2 rounded-md text-sm ml-2 font-medium cursor-pointer"
                   >
                     Logout
                   </button>
@@ -103,7 +103,7 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            {/* ✅ Guest Navigation */}
+            {/*   Guest Navigation */}
             <Link className="text-[#101815] hover:text-[#34a06c]" to="/">About</Link>
             <Link className="text-[#101815] hover:text-[#34a06c]" to="/">Services</Link>
             <Link className="text-[#101815] hover:text-[#34a06c]" to="/">Contact</Link>
@@ -130,7 +130,7 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* ✅ Mobile Menu Button */}
+      {/*   Mobile Menu Button */}
       <div className="lg:hidden">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -151,44 +151,44 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* ✅ Mobile Menu Dropdown */}
+      {/*   Mobile Menu Dropdown */}
       {isMenuOpen && (
         <div className="absolute top-14 right-4 w-[220px] bg-white rounded-xl shadow-lg border border-gray-200 p-4 flex flex-col gap-2 lg:hidden text-left">
           {isAuthenticated ? (
             <>
-              {/* ✅ My Info Heading with underline */}
+              {/*   My Info Heading with underline */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-800">My Info</h3>
                 <div className="w-fit border-b-2 border-gray-300 mt-2"></div>
               </div>
 
-              {/* ✅ Email */}
+              {/*   Email */}
               <div className="flex items-center gap-2 text-gray-700 text-sm">
                 <EnvelopeIcon className="w-4 h-4 text-gray-500" />
                 <span>{userEmail}</span>
               </div>
 
-              {/* ✅ Phone */}
+              {/*   Phone */}
               <div className="flex items-center gap-2 text-gray-700 text-sm">
                 <PhoneIcon className="w-4 h-4 text-gray-500" />
                 <span>{userPhone}</span>
               </div>
 
-              {/* ✅ Verified Badge */}
+              {/*   Verified Badge */}
               <div className="flex items-center gap-1 text-green-600 text-xs font-medium">
                 <CheckBadgeIcon className="w-4 h-4" />
                 <span>Verified</span>
               </div>
 
-              {/* ✅ Links */}
-              <Link className="text-[#101815] hover:text-[#34a06c] mt-2" to="/dashboard" onClick={() => setIsMenuOpen(false)}>Home</Link>
-              <Link className="text-[#101815] hover:text-[#34a06c]" to="/history" onClick={() => setIsMenuOpen(false)}>My Calls</Link>
-              <Link className="text-[#101815] hover:text-[#34a06c]" to="/resources" onClick={() => setIsMenuOpen(false)}>Resources</Link>
+              {/*   Links */}
+              <Link className="text-[#101815] hover:text-[#34a06c] mt-2" to="/dashboard" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
+              <Link className="text-[#101815] hover:text-[#34a06c]" to="/history" onClick={() => setIsMenuOpen(false)}>All Calls</Link>
+              <Link className="text-[#101815] hover:text-[#34a06c]" to="/settings" onClick={() => setIsMenuOpen(false)}>Settings</Link>
 
-              {/* ✅ Logout */}
+              {/*   Logout */}
               <button
                 onClick={() => { handleLogout(); setIsMenuOpen(false); }}
-                className="text-red-500 text-sm font-medium hover:underline mt-2"
+                className="bg-[#3FBF81] hover:bg-[#36a973] text-white px-4 py-2 rounded-md text-sm mt-2"
               >
                 Logout
               </button>
@@ -199,7 +199,7 @@ const Navbar = () => {
               <Link className="text-[#101815] hover:text-[#34a06c]" to="/" onClick={() => setIsMenuOpen(false)}>Services</Link>
               <Link className="text-[#101815] hover:text-[#34a06c]" to="/" onClick={() => setIsMenuOpen(false)}>Contact</Link>
 
-              {/* ✅ Conditional Sign In/Sign Up buttons */}
+              {/*   Conditional Sign In/Sign Up buttons */}
               {!isLoginPage && (
                 <Link to="/login" onClick={() => setIsMenuOpen(false)} className="bg-[#3fbf81] text-white rounded-full px-3 py-1 text-center hover:bg-[#34a06c] mt-2">
                   Sign In

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import CallHistoryTable from "./CallHistoryTable"; // ✅ Reusable component
+import CallHistoryTable from "./CallHistoryTable"; //   Reusable component
 
 export default function FamilyMemberDetails() {
   const { state: member } = useLocation();
@@ -9,7 +9,7 @@ export default function FamilyMemberDetails() {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // ✅ Editable fields
+  //   Editable fields
   const [editData, setEditData] = useState({
     name: member?.name || "",
     relationship: member?.relationship || "",
@@ -17,22 +17,22 @@ export default function FamilyMemberDetails() {
     phone: member?.phone || "(555) 123-4567",
   });
 
-  // ✅ FIXED profile image
+  //   FIXED profile image
   const profileImage =
     "https://images.unsplash.com/photo-1527980965255-d3b416303d12?crop=faces&fit=crop&w=300&h=300";
 
-  // ✅ Input handler
+  //   Input handler
   const handleChange = (e) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Save button action
+  //   Save button action
   const handleSave = () => {
-    alert("✅ Details updated successfully!");
+    alert("  Details updated successfully!");
     setIsEditing(false);
   };
 
-  // ✅ Sample Call History (member-specific)
+  //   Sample Call History (member-specific)
   const memberCalls = [
     { date: "July 15, 2024", time: "10:00 AM", topics: "Follow-up Check, Sleep Issues" },
     { date: "July 1, 2024", time: "9:30 AM", topics: "Diet Plan, Hydration" },
@@ -42,16 +42,16 @@ export default function FamilyMemberDetails() {
   return (
     <div className="ml-8 md:ml-0 min-h-screen bg-white">
       
-      {/* ✅ Breadcrumb */}
+      {/*   Breadcrumb */}
       <p className="text-xs sm:text-sm text-gray-500 mb-4">
         Family Members /{" "}
         <span className="text-gray-700 font-medium">{member?.name}</span>
       </p>
 
-      {/* ✅ Profile Section */}
+      {/*   Profile Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-xl">
         <div className="flex items-center gap-4">
-          {/* ✅ Profile Image */}
+          {/*   Profile Image */}
           <img
             src={profileImage}
             alt={member?.name}
@@ -68,7 +68,7 @@ export default function FamilyMemberDetails() {
           </div>
         </div>
 
-        {/* ✅ Edit Button */}
+        {/*   Edit Button */}
         <button
           onClick={() => setIsEditing(!isEditing)}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition w-full sm:w-auto"
@@ -78,7 +78,7 @@ export default function FamilyMemberDetails() {
         </button>
       </div>
 
-      {/* ✅ Edit Form */}
+      {/*   Edit Form */}
       {isEditing && (
         <div className="mt-4 p-5 rounded-xl">
           <h2 className="text-lg font-semibold mb-3 text-gray-800">
@@ -118,7 +118,7 @@ export default function FamilyMemberDetails() {
         </div>
       )}
 
-      {/* ✅ Health Details */}
+      {/*   Health Details */}
       <div className="mt-6 p-5 rounded-xl">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">
           Health Details
@@ -138,7 +138,7 @@ export default function FamilyMemberDetails() {
         </div>
       </div>
 
-      {/* ✅ Call History */}
+      {/*   Call History */}
       <div className="mt-6 p-5 rounded-xl">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">
           Call History
@@ -146,7 +146,7 @@ export default function FamilyMemberDetails() {
         <CallHistoryTable calls={memberCalls} />
       </div>
 
-      {/* ✅ Back Button */}
+      {/*   Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="mt-6 flex items-center justify-center gap-2 px-4 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition w-full sm:w-auto"

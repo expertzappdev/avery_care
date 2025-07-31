@@ -1,4 +1,4 @@
-// ✅ src/components/CallHistoryTable.jsx
+//   src/components/CallHistoryTable.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +7,7 @@ export default function CallHistoryTable({ calls }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="w-full border-collapse">
-        {/* ✅ Table Head */}
+        {/*   Table Head */}
         <thead>
           <tr className="bg-gray-100 text-left text-gray-700">
             <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
@@ -17,7 +17,7 @@ export default function CallHistoryTable({ calls }) {
           </tr>
         </thead>
 
-        {/* ✅ Table Body */}
+        {/*   Table Body */}
         <tbody>
           {calls.length > 0 ? (
             calls.map((call, index) => (

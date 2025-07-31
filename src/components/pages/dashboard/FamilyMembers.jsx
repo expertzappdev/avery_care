@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
 export default function FamilyMembers() {
-    const navigate = useNavigate();  // ✅ HOOK
+    const navigate = useNavigate();  //   HOOK
 
   const [familyList, setFamilyList] = useState([
     { name: "Ethan Carter", relationship: "Spouse" },
@@ -38,7 +38,7 @@ export default function FamilyMembers() {
   return (
     <div className="flex flex-col md:flex-row px-5 sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
       
-      {/* ✅ LEFT: FORM SECTION */}
+      {/*   LEFT: FORM SECTION */}
       <div className="flex-1 rounded-xl space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
           Add Family Member
@@ -64,7 +64,7 @@ export default function FamilyMembers() {
             </div>
           ))}
 
-          {/* ✅ Add Button */}
+          {/*   Add Button */}
           <div className="flex justify-center mt-6">
             <button
               onClick={handleAddMember}
@@ -77,8 +77,8 @@ export default function FamilyMembers() {
         </div>
       </div>
 
-      {/* ✅ RIGHT: FAMILY MEMBERS LIST */}
-      {/* ✅ RIGHT: FAMILY MEMBERS LIST */}
+      {/*   RIGHT: FAMILY MEMBERS LIST */}
+      {/*   RIGHT: FAMILY MEMBERS LIST */}
       <div className="flex-1 mt-4 md:mt-4 rounded-xl">
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           Added Family Members
@@ -98,7 +98,7 @@ export default function FamilyMembers() {
                   <p className="text-sm text-gray-500">{member.relationship}</p>
                 </div>
 
-                {/* ✅ DETAILS BUTTON */}
+                {/*   DETAILS BUTTON */}
                 <button
                   onClick={() => handleDetails(member)}
                   className="px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition"

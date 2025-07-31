@@ -10,6 +10,7 @@ import {
   Title,
   Tooltip,
   Legend,
+   Filler,
 } from "chart.js";
 
 import {
@@ -22,7 +23,7 @@ import {
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export default function Dashboard() {
   const { user } = useSelector((state) => state.auth);
@@ -34,18 +35,18 @@ export default function Dashboard() {
         label: "Mood Trend",
         data: [3, 4, 2, 5, 4, 3, 4],
         fill: true,
-        backgroundColor: "rgba(63, 191, 129, 0.15)", // ✅ updated green tone
-        borderColor: "#3fbf81", // ✅ updated line color
+        backgroundColor: "rgba(63, 191, 129, 0.15)", //   updated green tone
+        borderColor: "#3fbf81", //   updated line color
         tension: 0.3,
         pointRadius: 5,
-        pointBackgroundColor: "#3fbf81", // ✅ updated point color
+        pointBackgroundColor: "#3fbf81", //   updated point color
       },
     ],
   };
 
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // ✅ makes chart responsive
+    maintainAspectRatio: false, //   makes chart responsive
     plugins: { legend: { display: false } },
     scales: {
       x: {
@@ -81,7 +82,7 @@ export default function Dashboard() {
   return (
     <div className="bg-white min-h-screen px-4 sm:px-6 lg:px-12 space-y-12 pb-10">
       
-      {/* ✅ Welcome Section */}
+      {/*   Welcome Section */}
       <div className="space-y-3">
         <h1 className="text-2xl sm:text-3xl font-bold">
           Welcome back, <span className="text-[#3fbf81]">{user?.name || "User"}!</span>
@@ -98,7 +99,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* ✅ Buttons Section */}
+      {/*   Buttons Section */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#3fbf81] text-white font-medium rounded-full shadow hover:bg-[#36a973] transition w-full sm:w-auto text-sm">
           <PhoneIcon className="w-4 h-4" />
@@ -110,7 +111,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* ✅ Mood Tracker Section */}
+      {/*   Mood Tracker Section */}
       <div className="space-y-4">
         <h2 className="text-lg sm:text-xl font-semibold">How are you feeling today?</h2>
         <div className="flex flex-wrap gap-3">
@@ -126,10 +127,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ✅ Mood Trend Graph */}
+      {/*   Mood Trend Graph */}
       <div className="space-y-4">
         <h2 className="text-lg sm:text-xl font-semibold">Mood Trend (Last 7 Days)</h2>
-        <div className="w-full sm:w-190 rounded-lg bg-white p-3 sm:p-5 h-[300px] sm:h-[400px] lg:h-[450px]">
+        <div className="w-full sm:w-200 rounded-lg bg-white p-3 sm:p-5 h-[300px] sm:h-[400px] lg:h-[450px]">
           <Line data={data} options={options} />
         </div>
       </div>

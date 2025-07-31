@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
+import ProtectedRoute from './components/ProtectedRoute'
+import PublicRoute from "./components/PublicRoute";
 
-// ✅ Pages
+//   Pages
 import Home from "./components/pages/Home";
 import Login from "./components/pages/Login";
 import Register from "./components/pages/Register";
@@ -14,48 +16,51 @@ import FamilyMembersDetails from './components/pages/dashboard/FamilyMemberDetai
 import ScheduleHealthCall from "./components/pages/dashboard/ScheduleHealthCall";
 import CallHistory from "./components/pages/dashboard/CallHistory";
 import UpdateProfile from "./components/pages/dashboard/Settings";
+import CallDetails from "./components/pages/dashboard/CallDetails";
+import NotFound from "./components/pages/404";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-phone-input-2/lib/style.css";
-import CallDetails from "./components/pages/dashboard/CallDetails";
+
 
 function Layout() {
   const location = useLocation();
 
-  // ✅ Sidebar visible only on these pages
+  //   Sidebar visible only on these pages
   const showSidebar = ["/dashboard", "/family", "/schedule", "/history", "/settings", "/family-members","/family/undefined","/call-details"].includes(location.pathname);
 
   return (
     <div className="flex flex-col ">
-      {/* ✅ Navbar always at the top */}
+      {/*   Navbar always at the top */}
       <Navbar />
 
       <div className="flex max-h-fit min-h-screen flex-1 shadow-xs mb-10">
-        {/* ✅ Sidebar only for dashboard-related pages */}
+        {/*   Sidebar only for dashboard-related pages */}
         {showSidebar && <Sidebar />}
 
-        {/* ✅ Main Content */}
+        {/*   Main Content */}
         <div className="flex-1 flex flex-col bg-white">
           <main className="flex-1 p-6 md:p-10">
             <Routes>
-              {/* 🔹 Public Pages */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Register />} />
+              {/*  Public Pages */}
+              <Route path="/" element={  <Home /> } />
+              <Route path="/login" element={<PublicRoute> <Login /> </PublicRoute>}  />
+              <Route path="/signup" element={<PublicRoute> <Register /> </PublicRoute>} />
 
-              {/* 🔹 Dashboard Pages */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/family-members" element={<FamilyMembers />} />
-              <Route path="/family/:id" element={<FamilyMembersDetails />} />
-              <Route path="/schedule" element={<ScheduleHealthCall />} />
-              <Route path="/history" element={<CallHistory />} />
-              <Route path="/call-details" element={<CallDetails />} />
-              <Route path="/settings" element={<UpdateProfile />} />
+              {/*  Dashboard Pages */}
+              <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute>} />
+              <Route path="/family-members" element={<ProtectedRoute> <FamilyMembers /> </ProtectedRoute>} />
+              <Route path="/family/:id" element={<ProtectedRoute> <FamilyMembersDetails /> </ProtectedRoute>} />
+              <Route path="/schedule" element={<ProtectedRoute> <ScheduleHealthCall /> </ProtectedRoute>} />
+              <Route path="/history" element={<ProtectedRoute> <CallHistory /> </ProtectedRoute>} />
+              <Route path="/call-details" element={<ProtectedRoute> <CallDetails /> </ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute> <UpdateProfile /> </ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
 
-          {/* ✅ Footer stays at bottom */}
+          {/*   Footer stays at bottom */}
 
         </div>
       </div>
@@ -68,7 +73,7 @@ export default function App() {
   return (
     <Router>
       <Layout />
-      {/* ✅ Toast Notifications */}
+      {/*   Toast Notifications */}
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </Router>
   );

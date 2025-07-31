@@ -19,7 +19,7 @@ const SettingsPage = () => {
     setOpenSection(openSection === section ? null : section);
   };
 
-  // 📱 Change Phone Number state
+  //  Change Phone Number state
   const [phoneData, setPhoneData] = useState({
     oldPhone: "+91 9876543210",
     newPhone: "",
@@ -32,11 +32,11 @@ const SettingsPage = () => {
   };
 
   const updatePhone = () => {
-    alert(`✅ Phone updated to: ${phoneData.newPhone}`);
+    alert(`  Phone updated to: ${phoneData.newPhone}`);
     setPhoneData({ ...phoneData, newPhone: "", password: "" });
   };
 
-  // 🔑 Change Password state
+  //  Change Password state
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -50,29 +50,29 @@ const SettingsPage = () => {
 
   const updatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("❌ New passwords do not match!");
+      alert(" New passwords do not match!");
       return;
     }
-    alert("✅ Password updated successfully!");
+    alert("  Password updated successfully!");
     setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
   };
 
-  // 🛑 Delete Account Action
+  //  Delete Account Action
   const deleteAccount = () => {
     const confirmDelete = window.confirm(
-      "⚠️ Are you sure you want to permanently delete your account? This action cannot be undone."
+      "Are you sure you want to permanently delete your account? This action cannot be undone."
     );
     if (confirmDelete) {
-      alert("🗑️ Your account has been deleted.");
+      alert("Your account has been deleted.");
     }
   };
 
   return (
     <div className="min-h-screen bg-white px-6 sm:px-10">
-      {/* 🔥 Heading */}
+      {/*  Heading */}
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Settings</h2>
 
-      {/* 👤 Profile & Personal Info */}
+      {/*  Profile & Personal Info */}
       <div>
         <button
           type="button"
@@ -115,7 +115,7 @@ const SettingsPage = () => {
         )}
       </div>
 
-      {/* 📱 Change Phone Number */}
+      {/* Change Phone Number */}
       <div className="mt-5">
         <button
           type="button"
@@ -180,7 +180,7 @@ const SettingsPage = () => {
         )}
       </div>
 
-      {/* 🔑 Change Password */}
+      {/*  Change Password */}
       <div className="mt-5">
         <button
           type="button"
@@ -244,7 +244,7 @@ const SettingsPage = () => {
         )}
       </div>
 
-      {/* 🆘 Help & Support */}
+      {/* Help & Support */}
       <div className="mt-5">
         <button
           type="button"
@@ -278,7 +278,7 @@ const SettingsPage = () => {
         )}
       </div>
 
-      {/* ⚠️ Delete Account */}
+      {/*  Delete Account */}
       <div className="pt-4">
         <button
           type="button"
@@ -301,7 +301,7 @@ const SettingsPage = () => {
             </p>
             <button
               onClick={deleteAccount}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm"
+              className="bg-[#3FBF81] hover:bg-[#36a973] text-white px-4 py-2 rounded-md text-sm cursor-pointer"
             >
               Confirm Delete
             </button>

@@ -12,7 +12,7 @@ export default function CallDetails() {
   const { state: call } = useLocation();
   const navigate = useNavigate();
 
-  // ✅ Temporary Dummy Data
+  //   Temporary Dummy Data
   const [callData, setCallData] = useState({
     date: "October 24, 2024",
     time: "10:00 AM",
@@ -25,7 +25,7 @@ export default function CallDetails() {
     ],
     actions: ["Schedule follow-up call", "Prepare questions for doctor"],
 
-    // ✅ Call Recordings with date + time + duration
+    //   Call Recordings with date + time + duration
     recordings: [
       {
         id: 1,
@@ -62,7 +62,7 @@ export default function CallDetails() {
     ],
   });
 
-  // ✅ Agar call history se data aaya ho to overwrite karega
+  //   Agar call history se data aaya ho to overwrite karega
   useEffect(() => {
     if (call) {
       setCallData((prev) => ({
@@ -79,12 +79,12 @@ export default function CallDetails() {
   return (
     <div className="ml-8 min-h-screen bg-white">
       
-      {/* ✅ Breadcrumb */}
+      {/*   Breadcrumb */}
       <p className="text-sm text-gray-500">
         Calls / <span className="text-gray-700 font-medium">Call Details</span>
       </p>
 
-      {/* ✅ Heading */}
+      {/*   Heading */}
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
         Call Details
       </h1>
@@ -92,7 +92,7 @@ export default function CallDetails() {
         {callData.date} • {callData.time}
       </p>
 
-      {/* ✅ AI Summary Section */}
+      {/*   AI Summary Section */}
       <section className="mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <ChatBubbleLeftEllipsisIcon className="w-5 h-5 text-[#3fbf81]" />
@@ -101,14 +101,14 @@ export default function CallDetails() {
         <p className="text-gray-700 leading-relaxed">{callData.summary}</p>
       </section>
 
-      {/* ✅ Actionable Insights */}
+      {/*   Actionable Insights */}
       <section className="mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <ClipboardDocumentListIcon className="w-5 h-5 text-[#3fbf81]" />
           Actionable Insights
         </h2>
 
-        {/* ✅ Topics */}
+        {/*   Topics */}
         <div className="mb-4">
           <h3 className="text-gray-700 font-medium mb-1">Key Topics Discussed</h3>
           <ul className="list-disc list-inside text-gray-700 space-y-1">
@@ -118,7 +118,7 @@ export default function CallDetails() {
           </ul>
         </div>
 
-        {/* ✅ Actions */}
+        {/*   Actions */}
         <div>
           <h3 className="text-gray-700 font-medium mb-1">Action Items Mentioned</h3>
           <ul className="space-y-1">
@@ -131,7 +131,7 @@ export default function CallDetails() {
         </div>
       </section>
 
-      {/* ✅ MULTIPLE RECORDINGS SECTION */}
+      {/*   MULTIPLE RECORDINGS SECTION */}
       <section className="mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <PlayCircleIcon className="w-5 h-5 text-[#3fbf81]" />
@@ -159,7 +159,7 @@ export default function CallDetails() {
         </div>
       </section>
 
-      {/* ✅ Transcript Section */}
+      {/*   Transcript Section */}
       <section className="mb-10">
         <h3 className="text-gray-700 font-medium mb-2">Call Transcript (Latest Call)</h3>
         <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-gray-700 text-sm leading-relaxed max-h-[300px] overflow-y-auto">
@@ -171,7 +171,7 @@ export default function CallDetails() {
         </div>
       </section>
 
-      {/* ✅ Back Button */}
+      {/*   Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 px-4 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition"

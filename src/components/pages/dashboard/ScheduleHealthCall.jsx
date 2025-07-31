@@ -18,13 +18,13 @@ export default function ScheduleHealthCall() {
       alert("⚠️ Please fill in all fields before scheduling.");
       return;
     }
-    alert(`✅ Health Call Scheduled for ${selectedMember} on ${selectedDate} at ${selectedTime}`);
+    alert(`  Health Call Scheduled for ${selectedMember} on ${selectedDate} at ${selectedTime}`);
   };
 
   return (
     <div className="flex flex-col px-5 sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
       
-      {/* ✅ Page Title */}
+      {/*   Page Title */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Schedule Health Call</h1>
         <p className="text-gray-600">
@@ -32,7 +32,7 @@ export default function ScheduleHealthCall() {
         </p>
       </div>
 
-      {/* ✅ Form Section */}
+      {/*   Form Section */}
       <div className="max-w-2xl space-y-8">
         
         {/* Family Member Dropdown */}
@@ -44,7 +44,7 @@ export default function ScheduleHealthCall() {
           <select
             value={selectedMember}
             onChange={(e) => setSelectedMember(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
+            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
           >
             <option value="">Choose a family member</option>
             {familyMembers.map((member, index) => (
@@ -63,7 +63,7 @@ export default function ScheduleHealthCall() {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
+            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
           />
         </div>
 
@@ -77,15 +77,15 @@ export default function ScheduleHealthCall() {
             type="time"
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 shadow-sm outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
+            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
           />
         </div>
 
-        {/* ✅ Schedule Button */}
+        {/*   Schedule Button */}
         <div className="flex justify-center mt-6">
           <button
             onClick={handleSchedule}
-            className="flex items-center gap-2 px-8 py-3 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105 shadow-md"
+            className="flex items-center gap-2 px-8 py-3 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105"
           >
             <PhoneArrowUpRightIcon className="w-5 h-5" />
             Schedule Health Call
@@ -93,12 +93,12 @@ export default function ScheduleHealthCall() {
         </div>
       </div>
 
-      {/* ✅ Call Preview Section */}
+      {/*   Call Preview Section */}
       <div className="max-w-2xl">
         <h2 className="text-xl font-semibold mb-4">Call Preview</h2>
 
-        {/* ✅ White Card Style */}
-        <div className="border border-gray-200 rounded-xl bg-white p-6 space-y-5 shadow-sm">
+        {/*   White Card Style */}
+        <div className="border border-gray-200 rounded-xl bg-white p-6 space-y-5">
           
           {/* Member */}
           <div className="flex items-center gap-4">
