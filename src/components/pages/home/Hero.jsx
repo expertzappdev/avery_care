@@ -1,11 +1,11 @@
 // Hero Component
 import React from "react";
-import { Link } from "react-router-dom"; // ✅ Add Link for navigation
+import { Link } from "react-router-dom"; //   Add Link for navigation
 import bannerImage from "../../../assets/bannerImageHome.png";
 
 const Hero = () => {
   return (
-    <div className="px-4 sm:px-6 lg:px-5 pt-10 sm:pt-13 md:pt-15">
+    <div className="px-4 sm:px-6 lg:px-5 sm:pt-8">
       <div className="layout-content-container flex flex-col max-w-6xl mx-auto">
         <div className="@container">
           <div className="w-full">
@@ -25,9 +25,9 @@ const Hero = () => {
                 </h2>
               </div>
 
-              {/* ✅ Buttons with navigation */}
+              {/*   Buttons with navigation */}
               <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4 justify-center">
-                {/* ✅ Get Started -> Sign Up page */}
+                {/*   Get Started -> Sign Up page */}
                 <Link 
                   to="/signup"
                   className="flex min-w-[120px] items-center justify-center rounded-full h-12 px-6 bg-[#3fbf81] text-[#101815] text-base font-bold hover:bg-[#34a06c] transition-transform transform hover:scale-105"
@@ -35,7 +35,7 @@ const Hero = () => {
                   Get Started
                 </Link>
 
-                {/* ✅ Sign In -> Login page */}
+                {/*   Sign In -> Login page */}
                 <Link 
                   to="/login"
                   className="flex min-w-[120px] items-center justify-center rounded-full h-12 px-6 bg-[#eaf1ed] text-[#101815] text-base font-bold hover:bg-gray-200 transition-transform transform hover:scale-105"

@@ -20,7 +20,7 @@ const FeatureSection = () => {
   ];
 
   return (
-    <div className="pt-12 sm:pt-16 md:pt-20">
+    <div className="pt-12 sm:pt-16 md:pt-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center md:text-left mb-10 md:mb-12">
           <h1 className="text-[#101815] text-3xl sm:text-4xl font-bold leading-tight tracking-tight">

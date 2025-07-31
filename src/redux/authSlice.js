@@ -11,7 +11,7 @@ const authSlice = createSlice({
     successMessage: null,     
   },
   reducers: {
-    // ✅ LOGIN reducers
+    //   LOGIN reducers
     loginRequest: (state) => {
       state.loading = true;
       state.error = null;
@@ -28,7 +28,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
     },
 
-    // ✅ SIGNUP reducers
+    //   SIGNUP reducers
     signupRequest: (state) => {
       state.loading = true;
       state.error = null;
@@ -37,26 +37,26 @@ const authSlice = createSlice({
       state.loading = false;
       state.user = action.payload.user;
       state.token = action.payload.token;
-      state.successMessage = "✅ Account created successfully! Please login.";
+      state.successMessage = "  Account created successfully! Please login.";
     },
     signupFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
 
-    // ✅ LOGOUT
+    //   LOGOUT
     logout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
     },
 
-    // ✅ Success Message clear karne ke liye
+    //   Success Message clear karne ke liye
     clearSuccessMessage: (state) => {
       state.successMessage = null;
     },
 
-    // ✅ Error clear karne ke liye (Toast ke baad hata denge)
+    //   Error clear karne ke liye (Toast ke baad hata denge)
     clearError: (state) => {
       state.error = null;
     },
