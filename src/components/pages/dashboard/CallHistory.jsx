@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import CallHistoryTable from "./CallHistoryTable"
 
 export default function CallHistory() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
 
+  // ✅ Global calls (User + Family)
   const calls = [
     { date: "July 15, 2024", time: "10:00 AM", topics: "Stress Management, Sleep Improvement" },
     { date: "July 10, 2024", time: "2:30 PM", topics: "Nutrition, Exercise" },
@@ -52,49 +54,9 @@ export default function CallHistory() {
         />
       </div>
 
-      {/* ✅ Table Section */}
+      {/* ✅ Reusable Table */}
       <div className="max-w-5xl w-full">
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full border-collapse">
-            {/* ✅ Table Head */}
-            <thead>
-              <tr className="bg-gray-100 text-left text-gray-700">
-                <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
-                <th className="py-3 px-4 font-medium text-sm sm:text-base">Time</th>
-                <th className="py-3 px-4 font-medium text-sm sm:text-base">Key Topics</th>
-                <th className="py-3 px-4 font-medium text-sm sm:text-base"></th>
-              </tr>
-            </thead>
-
-            {/* ✅ Table Body */}
-            <tbody>
-              {filteredCalls.length > 0 ? (
-                filteredCalls.map((call, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition"
-                  >
-                    <td className="py-3 px-4 text-sm sm:text-base">{call.date}</td>
-                    <td className="py-3 px-4 text-sm sm:text-base">{call.time}</td>
-                    <td className="py-3 px-4 text-sm sm:text-base">{call.topics}</td>
-                    <td className="py-3 px-4 text-green-700 font-medium cursor-pointer hover:underline text-sm sm:text-base">
-                      View Details
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="text-center py-6 text-gray-500 italic text-sm sm:text-base"
-                  >
-                    No calls found for the selected filter.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <CallHistoryTable calls={filteredCalls} />
       </div>
     </div>
   );

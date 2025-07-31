@@ -49,9 +49,10 @@ export default function Dashboard() {
     plugins: { legend: { display: false } },
     scales: {
       x: {
+        offset: false,
         grid: { color: () => "transparent" },
         ticks: {
-          padding: 20,
+          padding: 10,
           font: { size: 14 },
         },
       },
@@ -59,7 +60,7 @@ export default function Dashboard() {
         min: 1,
         max: 5,
         ticks: {
-          padding: 15,
+          padding: 10,
           stepSize: 1,
           font: { size: 20, weight: "bold" },
           callback: (value) => ["☺", "☺", "☺", "☺", "☺"][value - 1],
@@ -128,7 +129,7 @@ export default function Dashboard() {
       {/* ✅ Mood Trend Graph */}
       <div className="space-y-4">
         <h2 className="text-lg sm:text-xl font-semibold">Mood Trend (Last 7 Days)</h2>
-        <div className="w-full rounded-lg bg-white p-3 sm:p-5 h-[300px] sm:h-[400px] lg:h-[450px]">
+        <div className="w-full sm:w-190 rounded-lg bg-white p-3 sm:p-5 h-[300px] sm:h-[400px] lg:h-[450px]">
           <Line data={data} options={options} />
         </div>
       </div>

@@ -10,6 +10,7 @@ import Login from "./components/pages/Login";
 import Register from "./components/pages/Register";
 import Dashboard from "./components/pages/dashboard/Dashboard";
 import FamilyMembers from "./components/pages/dashboard/FamilyMembers";
+import FamilyMembersDetails from './components/pages/dashboard/FamilyMemberDetails'
 import ScheduleHealthCall from "./components/pages/dashboard/ScheduleHealthCall";
 import CallHistory from "./components/pages/dashboard/CallHistory";
 import UpdateProfile from "./components/pages/dashboard/Settings";
@@ -17,12 +18,13 @@ import UpdateProfile from "./components/pages/dashboard/Settings";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-phone-input-2/lib/style.css";
+import CallDetails from "./components/pages/dashboard/CallDetails";
 
 function Layout() {
   const location = useLocation();
 
   // ✅ Sidebar visible only on these pages
-  const showSidebar = ["/dashboard", "/family", "/schedule", "/history", "/settings"].includes(location.pathname);
+  const showSidebar = ["/dashboard", "/family", "/schedule", "/history", "/settings", "/family-members","/family/undefined","/call-details"].includes(location.pathname);
 
   return (
     <div className="flex flex-col ">
@@ -44,15 +46,17 @@ function Layout() {
 
               {/* 🔹 Dashboard Pages */}
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/family" element={<FamilyMembers />} />
+              <Route path="/family-members" element={<FamilyMembers />} />
+              <Route path="/family/:id" element={<FamilyMembersDetails />} />
               <Route path="/schedule" element={<ScheduleHealthCall />} />
               <Route path="/history" element={<CallHistory />} />
+              <Route path="/call-details" element={<CallDetails />} />
               <Route path="/settings" element={<UpdateProfile />} />
             </Routes>
           </main>
 
           {/* ✅ Footer stays at bottom */}
-          
+
         </div>
       </div>
       <Footer />

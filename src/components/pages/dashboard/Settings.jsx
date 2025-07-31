@@ -166,7 +166,7 @@ const SettingsPage = () => {
                 value={phoneData.password}
                 onChange={handlePhoneChange}
                 placeholder="Enter your password"
-                className="mt-1 w-full sm:w-72 px-3 py-2 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
+                className="mt-1 w-full sm:w-72 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
               />
             </div>
 
@@ -206,7 +206,7 @@ const SettingsPage = () => {
                 value={passwordData.oldPassword}
                 onChange={handlePasswordChange}
                 placeholder="Enter old password"
-                className="mt-1 w-full sm:w-72 px-3 py-2 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
+                className="mt-1 w-full sm:w-72 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
               />
             </div>
 
@@ -218,7 +218,7 @@ const SettingsPage = () => {
                 value={passwordData.newPassword}
                 onChange={handlePasswordChange}
                 placeholder="Enter new password"
-                className="mt-1 w-full sm:w-72 px-3 py-2 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
+                className="mt-1 w-full sm:w-72 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
               />
             </div>
 
@@ -230,7 +230,7 @@ const SettingsPage = () => {
                 value={passwordData.confirmPassword}
                 onChange={handlePasswordChange}
                 placeholder="Confirm new password"
-                className="mt-1 w-full sm:w-72 px-3 py-2 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
+                className="mt-1 w-full sm:w-72 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
               />
             </div>
 

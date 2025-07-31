@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { PencilIcon, UserPlusIcon } from "@heroicons/react/24/outline";
 
 export default function FamilyMembers() {
+    const navigate = useNavigate();  // ✅ HOOK
+
   const [familyList, setFamilyList] = useState([
     { name: "Ethan Carter", relationship: "Spouse" },
     { name: "Sophia Carter", relationship: "Child" },
@@ -27,6 +30,9 @@ export default function FamilyMembers() {
       ]);
       setFormData({ name: "", relationship: "", email: "", phone: "" });
     }
+  };
+  const handleDetails = (member) => {
+    navigate(`/family/${member.id}`, { state: member });
   };
 
   return (
@@ -72,7 +78,8 @@ export default function FamilyMembers() {
       </div>
 
       {/* ✅ RIGHT: FAMILY MEMBERS LIST */}
-      <div className="flex-1 mt-4 md:mt-0 rounded-xl">
+      {/* ✅ RIGHT: FAMILY MEMBERS LIST */}
+      <div className="flex-1 mt-4 md:mt-4 rounded-xl">
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           Added Family Members
         </h2>
@@ -81,9 +88,9 @@ export default function FamilyMembers() {
           <p className="text-gray-500 italic">No family members added yet.</p>
         ) : (
           <div className="divide-y divide-gray-200">
-            {familyList.map((member, index) => (
+            {familyList.map((member) => (
               <div
-                key={index}
+                key={member.id}
                 className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
               >
                 <div>
@@ -91,9 +98,12 @@ export default function FamilyMembers() {
                   <p className="text-sm text-gray-500">{member.relationship}</p>
                 </div>
 
-                {/* ✅ Edit Icon */}
-                <button className="p-2 hover:bg-gray-100 rounded-full transition">
-                  <PencilIcon className="h-5 w-5 text-gray-600 hover:text-[#3fbf81]" />
+                {/* ✅ DETAILS BUTTON */}
+                <button
+                  onClick={() => handleDetails(member)}
+                  className="px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition"
+                >
+                  Details
                 </button>
               </div>
             ))}

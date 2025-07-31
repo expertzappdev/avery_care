@@ -11,8 +11,8 @@ import {
 const navItems = [
   { id: "dashboard", name: "Dashboard", icon: HomeIcon, path: "/dashboard" },
   { id: "schedule", name: "Schedule", icon: CalendarIcon, path: "/schedule" },
-  { id: "history", name: "History", icon: ClockIcon, path: "/history" },
-  { id: "family", name: "Family Members", icon: UserGroupIcon, path: "/family" },
+  { id: "history", name: "Call History", icon: ClockIcon, path: "/history" },
+  { id: "family", name: "Family Members", icon: UserGroupIcon, path: "/family-members" },
   { id: "settings", name: "Settings", icon: Cog6ToothIcon, path: "/settings" },
 ];
 
@@ -31,7 +31,7 @@ export default function Sidebar() {
               `flex items-center gap-3 px-4 py-3 rounded-full mx-2 md:mx-4 transition-all duration-200
                ${
                  isActive
-                   ? "bg-[#E3F5ED] text-green-700 font-semibold"
+                   ? "bg-[#E3F5ED] text-[#3fbf81] font-semibold"
                    : "text-gray-700 hover:bg-[#F6FAF9]"
                }`
             }

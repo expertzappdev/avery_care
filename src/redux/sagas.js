@@ -5,7 +5,7 @@ import {
   signupRequest, signupSuccess, signupFailure
 } from "./authSlice";
 
-const API_URL = "http://192.168.43.34:5000/api/auth";
+const API_URL = "http://192.168.184.230:5000/api/auth";
 
 // API Calls
 function loginApi(payload) {
