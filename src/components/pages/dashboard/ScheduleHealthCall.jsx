@@ -1,135 +1,250 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+// import { toast } from 'react-toastify'; // ❌ Removed toast import
+
 import {
-  UserIcon,
-  CalendarDaysIcon,
-  ClockIcon,
-  PhoneArrowUpRightIcon,
-} from "@heroicons/react/24/outline";
+  fetchFamilyMembersRequest,
+  addFamilyMemberRequest,
+  deleteFamilyMemberRequest,
+  // clearMessages, // ❌ Removed clearMessages import
+} from "../../../redux/familySlice";
+import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-export default function ScheduleHealthCall() {
-  const [selectedMember, setSelectedMember] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+export default function FamilyMembers() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  // ❌ Removed successMessage from destructuring as it's no longer used for toasts
+  const { familyMembers: familyList, loading, error } = useSelector(
+    (state) => state.family
+  );
 
-  const familyMembers = ["Ethan Carter", "Sophia Carter", "Liam Carter"];
+  const [formData, setFormData] = useState({
+    name: "",
+    relationship: "",
+    email: "",
+    phoneNumber: "",
+  });
 
-  const handleSchedule = () => {
-    if (!selectedMember || !selectedDate || !selectedTime) {
-      alert("⚠️ Please fill in all fields before scheduling.");
+  useEffect(() => {
+    dispatch(fetchFamilyMembersRequest());
+  }, [dispatch]);
+
+  // ❌ Removed useEffect to show toast notifications for errors and success messages
+  // useEffect(() => {
+  //   if (error) {
+  //     toast.error(error);
+  //     dispatch(clearMessages()); // Clear error after displaying
+  //   }
+  //   if (successMessage) {
+  //     toast.success(successMessage);
+  //     dispatch(clearMessages()); // Clear success message after displaying
+  //   }
+  // }, [error, successMessage, dispatch]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleAddMember = () => {
+    // Basic client-side validation
+    if (
+      !formData.name ||
+      !formData.relationship ||
+      !formData.email ||
+      !formData.phoneNumber
+    ) {
+      // ❌ Replaced toast with a simple alert or console log if you want
+      // You can decide how to handle this client-side validation message now.
+      // For now, I'm just removing the toast.
+      alert("Please fill in ALL required fields (Name, Relationship, Email, Phone Number).");
       return;
     }
-    alert(`  Health Call Scheduled for ${selectedMember} on ${selectedDate} at ${selectedTime}`);
+
+    dispatch(addFamilyMemberRequest(formData));
+    setFormData({ name: "", relationship: "", email: "", phoneNumber: "" });
+  };
+
+  const handleDelete = (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this family member?"
+    );
+    if (confirmDelete) {
+      dispatch(deleteFamilyMemberRequest(id));
+    }
+  };
+
+  const handleDetails = (member) => {
+    navigate(`/family/${member._id || member.id}`, { state: member });
   };
 
   return (
-    <div className="flex flex-col px-5 sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
-      
-      {/*   Page Title */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Schedule Health Call</h1>
-        <p className="text-gray-600">
-          Schedule an <span className="text-[#3fbf81] font-semibold">AI-powered</span> health check call for a family member.
-        </p>
+    <div className="flex flex-col md:flex-row px-5 sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
+      {/* ❌ ToastContainer no longer relevant for this component */}
+
+      {/* LEFT: FORM SECTION */}
+      <div className="flex-1 rounded-xl space-y-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+          Add Family Member
+        </h1>
+
+        <div className="space-y-5">
+          {[
+            { label: "Name", name: "name", type: "text", placeholder: "Enter name" },
+            {
+              label: "Relationship",
+              name: "relationship",
+              type: "text",
+              placeholder: "Enter relationship",
+            },
+            { label: "Email", name: "email", type: "email", placeholder: "Enter email" },
+            {
+              label: "Phone Number",
+              name: "phoneNumber",
+              type: "text",
+              placeholder: "Enter phone number",
+            },
+          ].map((field, idx) => (
+            <div key={idx}>
+              <label className="block font-medium mb-2 text-gray-700">
+                {field.label}
+              </label>
+              <input
+                type={field.type}
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleChange}
+                placeholder={field.placeholder}
+                className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] transition"
+              />
+            </div>
+          ))}
+
+          {/* Add Button */}
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={handleAddMember}
+              disabled={loading} // Disable button when loading
+              className={`flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <UserPlusIcon className="w-5 h-5" />
+                  Add Family Member
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/*   Form Section */}
-      <div className="max-w-2xl space-y-8">
-        
-        {/* Family Member Dropdown */}
-        <div>
-          <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
-            <UserIcon className="w-5 h-5 text-[#3fbf81]" />
-            Select Family Member
-          </label>
-          <select
-            value={selectedMember}
-            onChange={(e) => setSelectedMember(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
-          >
-            <option value="">Choose a family member</option>
-            {familyMembers.map((member, index) => (
-              <option key={index} value={member}>{member}</option>
+      {/* RIGHT: FAMILY MEMBERS LIST */}
+      <div className="flex-1 mt-4 md:mt-4 rounded-xl">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+          Added Family Members
+        </h2>
+
+        {/* Logged-in User */}
+        {user?.name && (
+          <div className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition border-b border-gray-200">
+            <div>
+              <p className="font-medium text-lg text-gray-900">
+                {user.name} <span className="text-sm text-gray-500">(You)</span>
+              </p>
+              <p className="text-sm text-gray-500">Self</p>
+            </div>
+            <button
+              onClick={() => handleDetails(user)}
+              className="px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition"
+            >
+              Details
+            </button>
+          </div>
+        )}
+
+        {/* Display loading message for family list fetch */}
+        {loading && familyList.length === 0 && (
+          <p className="text-gray-500 italic mt-4">
+            Loading family members...
+          </p>
+        )}
+
+        {/* Display no members message */}
+        {!loading && familyList.length === 0 ? (
+          <p className="text-gray-500 italic mt-4">
+            No family members added yet.
+          </p>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {familyList.map((member) => (
+              <div
+                key={member._id}
+                className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
+              >
+                {/* MIDDLE: MEMBER DETAILS */}
+                <div>
+                  <p className="font-medium text-lg text-gray-900">
+                    {member.name}
+                  </p>
+                  <p className="text-sm text-gray-500">{member.relationship}</p>
+                </div>
+
+                {/* RIGHT: ACTION BUTTONS */}
+                <div className="flex items-center gap-3">
+                  {/* Delete Button just before Details */}
+                  <button
+                    onClick={() => handleDelete(member._id)}
+                    disabled={loading} // Disable delete button when loading
+                    className={`text-red-500 hover:text-red-700 transition ${
+                      loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    title="Delete"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+
+                  {/* Details Button */}
+                  <button
+                    onClick={() => handleDetails(member)}
+                    disabled={loading} // Disable details button when loading
+                    className={`px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition ${
+                      loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                  >
+                    Details
+                  </button>
+                </div>
+              </div>
             ))}
-          </select>
-        </div>
-
-        {/* Date Picker */}
-        <div>
-          <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
-            <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
-            Select Date
-          </label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
-          />
-        </div>
-
-        {/* Time Picker */}
-        <div>
-          <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
-            <ClockIcon className="w-5 h-5 text-[#3fbf81]" />
-            Select Time
-          </label>
-          <input
-            type="time"
-            value={selectedTime}
-            onChange={(e) => setSelectedTime(e.target.value)}
-            className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
-          />
-        </div>
-
-        {/*   Schedule Button */}
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={handleSchedule}
-            className="flex items-center gap-2 px-8 py-3 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105"
-          >
-            <PhoneArrowUpRightIcon className="w-5 h-5" />
-            Schedule Health Call
-          </button>
-        </div>
-      </div>
-
-      {/*   Call Preview Section */}
-      <div className="max-w-2xl">
-        <h2 className="text-xl font-semibold mb-4">Call Preview</h2>
-
-        {/*   White Card Style */}
-        <div className="border border-gray-200 rounded-xl bg-white p-6 space-y-5">
-          
-          {/* Member */}
-          <div className="flex items-center gap-4">
-            <div className="bg-[#eafaf3] p-3 rounded-full">
-              <UserIcon className="w-7 h-7 text-[#3fbf81]" />
-            </div>
-            <p className="text-gray-700 text-lg">
-              <strong>Family Member:</strong> {selectedMember || "Not selected"}
-            </p>
           </div>
-
-          {/* Date */}
-          <div className="flex items-center gap-4">
-            <div className="bg-[#eafaf3] p-3 rounded-full">
-              <CalendarDaysIcon className="w-7 h-7 text-[#3fbf81]" />
-            </div>
-            <p className="text-gray-700 text-lg">
-              <strong>Date:</strong> {selectedDate || "Not selected"}
-            </p>
-          </div>
-
-          {/* Time */}
-          <div className="flex items-center gap-4">
-            <div className="bg-[#eafaf3] p-3 rounded-full">
-              <ClockIcon className="w-7 h-7 text-[#3fbf81]" />
-            </div>
-            <p className="text-gray-700 text-lg">
-              <strong>Time:</strong> {selectedTime || "Not selected"}
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

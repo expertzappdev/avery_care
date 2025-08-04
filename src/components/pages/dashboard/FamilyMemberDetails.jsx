@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import CallHistoryTable from "./CallHistoryTable"; //   Reusable component
+
 
 export default function FamilyMemberDetails() {
   const { state: member } = useLocation();
@@ -26,6 +27,14 @@ export default function FamilyMemberDetails() {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
+  const handleDelete = () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this member?");
+    if (confirmDelete) {
+      // Yaha tu actual delete API ya logic laga sakta hai
+      navigate("/family-members");
+    }
+  };
+
   //   Save button action
   const handleSave = () => {
     alert("  Details updated successfully!");
@@ -40,8 +49,8 @@ export default function FamilyMemberDetails() {
   ];
 
   return (
-    <div className="ml-8 md:ml-0 min-h-screen bg-white">
-      
+    <div className="sm:ml-8 md:ml-0 min-h-screen bg-white">
+
       {/*   Breadcrumb */}
       <p className="text-xs sm:text-sm text-gray-500 mb-4">
         Family Members /{" "}
@@ -68,14 +77,28 @@ export default function FamilyMemberDetails() {
           </div>
         </div>
 
-        {/*   Edit Button */}
-        <button
-          onClick={() => setIsEditing(!isEditing)}
-          className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition w-full sm:w-auto"
-        >
-          <PencilSquareIcon className="w-5 h-5" />
-          {isEditing ? "Cancel" : "Edit"}
-        </button>
+        {/* Buttons Wrapper */}
+<div className="flex flex-col gap-2 w-full sm:w-auto">
+  {/* Edit Button */}
+  <button
+    onClick={() => setIsEditing(!isEditing)}
+    className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition w-full sm:w-auto"
+  >
+    <PencilSquareIcon className="w-5 h-5" />
+    {isEditing ? "Cancel" : "Edit"}
+  </button>
+
+  {/* Delete Button */}
+  <button
+    onClick={handleDelete}
+    className="flex items-center justify-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition w-full sm:w-auto"
+  >
+    <TrashIcon className="w-5 h-5" />
+    Delete
+  </button>
+</div>
+
+
       </div>
 
       {/*   Edit Form */}

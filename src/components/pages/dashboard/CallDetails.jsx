@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function CallDetails() {
-  const { state: call } = useLocation();
+  const { state: call } = useLocation(); 
   const navigate = useNavigate();
 
   //   Temporary Dummy Data

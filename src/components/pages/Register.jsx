@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
+import {
+  signupRequest,
+  clearSuccessMessage,
+  clearError,
+} from "../../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { signupRequest, clearSuccessMessage, clearError } from "../../redux/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PhoneInput from "react-phone-input-2";
-import 'react-phone-input-2/lib/style.css'; //   Import CSS
+import "react-phone-input-2/lib/style.css";
 
 export default function Signup() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, successMessage } = useSelector((state) => state.auth);
+  const { loading, error, successMessage, email } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -18,32 +22,44 @@ export default function Signup() {
     password: "",
   });
 
-  //   Handle change for normal inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  //   Phone input handle
-  const handlePhoneChange = (value) => {
-    setFormData({ ...formData, phoneNumber: `+${value}` }); 
+  const handlePhoneChange = (value, country) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      phoneNumber: `+${value}`, // Store with '+' prefix
+    }));
+  };
+
+  const handlePhoneKeyDown = (e) => {
+    const input = e.target;
+    const caretPosition = input.selectionStart;
+    if ((e.key === "Backspace" || e.key === "Delete") && caretPosition <= 3) {
+      e.preventDefault();
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // console.log("Submitting signup form with data:", formData);
     dispatch(signupRequest(formData));
   };
 
-  //   Success toast + redirect
+  // Effect for success message and redirection
   useEffect(() => {
-    if (successMessage) {
+    console.log("Signup useEffect - successMessage:", successMessage, "email:", email);
+    if (successMessage && email) {
       toast.success(successMessage, { position: "top-right" });
+      navigate("/verify-otp", { state: { email } });
       dispatch(clearSuccessMessage());
-      navigate("/login");
     }
-  }, [successMessage, dispatch, navigate]);
+  }, [successMessage, email, navigate, dispatch]);
 
-  //   Error toast
+  // Effect for error messages
   useEffect(() => {
+    console.log("Signup useEffect - error:", error);
     if (error) {
       toast.error(error, { position: "top-right" });
       dispatch(clearError());
@@ -52,8 +68,6 @@ export default function Signup() {
 
   return (
     <div className="sm:min-h-screen flex flex-col items-center px-4 sm:px-6 lg:px-8 bg-white pt-6 max-sm:mb-40 max-sm:px-8">
-      
-      {/*   Title Section */}
       <div className="text-center mb-8 max-sm:mt-20">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
           Create an Account
@@ -63,10 +77,7 @@ export default function Signup() {
         </p>
       </div>
 
-      {/*   Signup Form */}
       <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
-
-        {/*   Name */}
         <div className="w-full">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name
@@ -79,12 +90,11 @@ export default function Signup() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
           />
         </div>
 
-        {/*   Email */}
         <div className="w-full">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
@@ -97,37 +107,42 @@ export default function Signup() {
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
           />
         </div>
 
-        {/*   Phone (with country code dropdown) */}
         <div className="w-full">
           <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
             Phone Number
           </label>
           <PhoneInput
-            country={"in"} // default India
+            country={"in"}
+            onlyCountries={["in"]}
+            disableDropdown={true}
             value={formData.phoneNumber}
             onChange={handlePhoneChange}
+            inputProps={{
+              onKeyDown: handlePhoneKeyDown,
+              name: "phoneNumber",
+              required: true,
+            }}
             inputStyle={{
               width: "100%",
               height: "48px",
               borderRadius: "8px",
               border: "1px solid #d1d5db",
               fontSize: "16px",
-              paddingLeft: "60px"
+              paddingLeft: "60px",
             }}
             buttonStyle={{
               borderRadius: "8px 0 0 8px",
               border: "1px solid #d1d5db",
-              padding:"0 5px 0",
+              padding: "0 5px 0",
             }}
           />
         </div>
 
-        {/*   Password */}
         <div className="w-full">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
@@ -140,22 +155,21 @@ export default function Signup() {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none 
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none
               focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] placeholder-gray-400 transition"
           />
         </div>
 
-        {/*   Submit Button */}
         <button
           type="submit"
-          className="w-full py-3 rounded-full text-lg font-semibold text-white bg-[#3fbf81] 
+          className="w-full py-3 rounded-full text-lg font-semibold text-white bg-[#3fbf81]
             hover:bg-[#34a06c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3fbf81] transition-all"
+          disabled={loading}
         >
           {loading ? "Signing Up..." : "Sign Up"}
         </button>
       </form>
 
-      {/*   Login Link */}
       <div className="mt-6 text-center text-sm text-gray-700">
         Already have an account?{" "}
         <Link to="/login" className="font-semibold text-[#3fbf81] hover:underline">

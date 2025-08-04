@@ -23,7 +23,7 @@ export default function CallHistory() {
   );
 
   return (
-    <div className="flex flex-col px-5 sm:px-10 lg:px-12 min-h-screen bg-white space-y-10">
+    <div className="flex flex-col sm:px-10 lg:px-12 min-h-screen bg-white space-y-10">
       {/*   Page Title */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Call History</h1>
