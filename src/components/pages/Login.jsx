@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginRequest, clearError, clearSuccessMessage } from "../../redux/authSlice";
+import { loginRequest, clearError } from "../../redux/authSlice"; // Removed clearSuccessMessage as it's not relevant for login success
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated, successMessage } = useSelector((state) => state.auth);
+  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({ email: "", password: "" });
 
@@ -20,16 +20,15 @@ export default function Login() {
     dispatch(loginRequest(formData));
   };
 
-  //   Login success hone pe navigate + toast
+  // Login success logic: checks for isAuthenticated
   useEffect(() => {
     if (isAuthenticated) {
-      toast.success("Welcome back!");
-      dispatch(clearSuccessMessage());
+      toast.success("Welcome back!", { position: "top-right" });
       navigate("/dashboard");
     }
-  }, [isAuthenticated, navigate, dispatch]);
+  }, [isAuthenticated, navigate]); // Added navigate to the dependency array
 
-  //   Error aate hi toast show + clear
+  // Error logic: checks for error state
   useEffect(() => {
     if (error) {
       toast.error(error, { position: "top-right" });
@@ -39,8 +38,7 @@ export default function Login() {
 
   return (
     <div className="sm:min-h-screen flex flex-col items-center px-4 sm:px-6 lg:px-8 bg-white pt-10 sm:pt-16 max-sm:pt-28 max-sm:mb-60 max-sm:px-8">
-      
-      {/*   Title Section */}
+      {/* Title Section */}
       <div className="text-center mb-8">
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
           Welcome Back
@@ -50,7 +48,7 @@ export default function Login() {
         </p>
       </div>
 
-      {/*   Login Form */}
+      {/* Login Form */}
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-5">
         <div className="w-full">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -69,7 +67,7 @@ export default function Login() {
           />
         </div>
 
-        {/*   Password */}
+        {/* Password */}
         <div className="w-full">
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
@@ -90,17 +88,18 @@ export default function Login() {
           </a>
         </div>
 
-        {/*   Submit Button */}
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full py-3 rounded-full text-lg font-semibold text-white bg-[#3fbf81] 
             hover:bg-[#34a06c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3fbf81] transition-all"
+          disabled={loading} // Disable the button while the login request is in progress
         >
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
 
-      {/*   Signup Link */}
+      {/* Signup Link */}
       <div className="mt-6 text-center text-sm text-gray-700">
         Don’t have an account?{" "}
         <Link to="/signup" className="font-semibold text-[#3fbf81] hover:underline">

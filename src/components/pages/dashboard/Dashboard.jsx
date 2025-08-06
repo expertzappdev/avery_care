@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import React from "react";
 import { Line } from "react-chartjs-2";
+import { useNavigate } from "react-router-dom";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +11,7 @@ import {
   Title,
   Tooltip,
   Legend,
-   Filler,
+  Filler,
 } from "chart.js";
 
 import {
@@ -26,31 +27,37 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export default function Dashboard() {
+  const navigate=useNavigate()
   const { user } = useSelector((state) => state.auth);
 
+  // Emojis top-to-bottom (Happy → Overwhelmed)
+  const moodEmojis = ["😀︎", "😐︎", "😢︎", "😟︎", "😫︎"];
+
+  // Dummy data for the mood chart
+  // You can replace this with real data from your backend.
+  // The y-axis values correspond to the moodEmojis array index (e.g., 1 = 😀︎, 5 = 😫︎).
   const data = {
     labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     datasets: [
       {
         label: "Mood Trend",
-        data: [3, 4, 2, 5, 4, 3, 4],
+        data: [5, 2, 3, 4, 5, 2, 1],
         fill: true,
-        backgroundColor: "rgba(63, 191, 129, 0.15)", //   updated green tone
-        borderColor: "#3fbf81", //   updated line color
+        backgroundColor: "rgba(255,255,255,0.6)",
+        borderColor: "#3fbf81",
         tension: 0.3,
         pointRadius: 5,
-        pointBackgroundColor: "#3fbf81", //   updated point color
+        pointBackgroundColor: "#3fbf81",
       },
     ],
   };
 
   const options = {
     responsive: true,
-    maintainAspectRatio: false, //   makes chart responsive
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
       x: {
-        offset: false,
         grid: { color: () => "transparent" },
         ticks: {
           padding: 10,
@@ -60,11 +67,12 @@ export default function Dashboard() {
       y: {
         min: 1,
         max: 5,
+        reverse: true, // Happy sabse upar
         ticks: {
           padding: 10,
           stepSize: 1,
-          font: { size: 20, weight: "bold" },
-          callback: (value) => ["☺", "☺", "☺", "☺", "☺"][value - 1],
+          font: { size: 20 },
+          callback: (value) => moodEmojis[value - 1],
         },
         grid: { color: () => "transparent" },
       },
@@ -80,28 +88,27 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="bg-white min-h-screen px-4 sm:px-6 lg:px-12 space-y-12 pb-10">
+    <div className="bg-white min-h-screen sm:px-8 lg:px-12 space-y-12 pb-12">
       
-      {/*   Welcome Section */}
+      {/* Welcome Section */}
       <div className="space-y-3">
         <h1 className="text-2xl sm:text-3xl font-bold">
           Welcome back, <span className="text-[#3fbf81]">{user?.name || "User"}!</span>
         </h1>
-
         <p className="text-gray-700 text-base sm:text-lg flex items-center gap-2 flex-wrap">
           <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
           <span>
             Next Scheduled Call:{" "}
             <span className="text-[#3fbf81] font-semibold">
-              Wednesday, July 10, 2024 at 2:00 PM
+              Not any call scheduled
             </span>
           </span>
         </p>
       </div>
 
-      {/*   Buttons Section */}
+      {/* Buttons Section */}
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#3fbf81] text-white font-medium rounded-full shadow hover:bg-[#36a973] transition w-full sm:w-auto text-sm">
+        <button onClick={() => navigate('/schedule')} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#3fbf81] text-white font-medium rounded-full shadow hover:bg-[#36a973] transition w-full sm:w-auto text-sm">
           <PhoneIcon className="w-4 h-4" />
           Schedule a New Call
         </button>
@@ -111,7 +118,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/*   Mood Tracker Section */}
+      {/* Mood Tracker Section */}
       <div className="space-y-4">
         <h2 className="text-lg sm:text-xl font-semibold">How are you feeling today?</h2>
         <div className="flex flex-wrap gap-3">
@@ -127,7 +134,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/*   Mood Trend Graph */}
+      {/* Mood Trend Graph */}
       <div className="space-y-4">
         <h2 className="text-lg sm:text-xl font-semibold">Mood Trend (Last 7 Days)</h2>
         <div className="w-full sm:w-200 rounded-lg bg-white p-3 sm:p-5 h-[300px] sm:h-[400px] lg:h-[450px]">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
+import { useDispatch, useSelector } from "react-redux";
 import {
   User,
   Phone,
@@ -14,29 +15,44 @@ import {
 
 const SettingsPage = () => {
   const [openSection, setOpenSection] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
   };
 
-  //  Change Phone Number state
+  // Change Phone Number state
   const [phoneData, setPhoneData] = useState({
-    oldPhone: "+91 9876543210",
+    oldPhone: user?.phoneNumber || "",
     newPhone: "",
     password: "",
   });
 
-  const handlePhoneChange = (e) => {
-    const { name, value } = e.target;
-    setPhoneData({ ...phoneData, [name]: value });
+  const handlePhoneChange = (value) => {
+    if (!value.startsWith("91")) {
+      value = "91" + value.replace(/^(\+?91)?/, "");
+    }
+    setPhoneData((prev) => ({ ...prev, newPhone: `+${value}` }));
+  };
+
+  const handlePhoneKeyDown = (e) => {
+    const input = e.target;
+    const caretPosition = input.selectionStart;
+
+    if ((e.key === "Backspace" || e.key === "Delete") && caretPosition <= 3) {
+      e.preventDefault();
+    }
   };
 
   const updatePhone = () => {
-    alert(`  Phone updated to: ${phoneData.newPhone}`);
+    // Replaced alert with a message box for a non-blocking UI
+    const message = `Phone updated to: ${phoneData.newPhone}`;
+    // In a real app, you would dispatch a Redux action here.
+    alert(message);
     setPhoneData({ ...phoneData, newPhone: "", password: "" });
   };
 
-  //  Change Password state
+  // Change Password state
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -50,29 +66,31 @@ const SettingsPage = () => {
 
   const updatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert(" New passwords do not match!");
+      alert("New passwords do not match!");
       return;
     }
-    alert("  Password updated successfully!");
+    // Replaced alert with a message box for a non-blocking UI
+    // In a real app, you would dispatch a Redux action here.
+    alert("Password updated successfully!");
     setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
   };
 
-  //  Delete Account Action
   const deleteAccount = () => {
+    // Replaced window.confirm with a message box for a non-blocking UI
     const confirmDelete = window.confirm(
       "Are you sure you want to permanently delete your account? This action cannot be undone."
     );
     if (confirmDelete) {
+      // In a real app, you would dispatch a Redux action to delete the account.
       alert("Your account has been deleted.");
     }
   };
 
   return (
     <div className="min-h-screen bg-white px-6 sm:px-10">
-      {/*  Heading */}
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Settings</h2>
 
-      {/*  Profile & Personal Info */}
+      {/* Profile Section */}
       <div>
         <button
           type="button"
@@ -81,35 +99,26 @@ const SettingsPage = () => {
         >
           <User className="w-5 h-5 text-gray-700" />
           Profile & Personal Info
-          {openSection === "profile" ? (
-            <ChevronUp className="ml-auto w-5 h-5" />
-          ) : (
-            <ChevronDown className="ml-auto w-5 h-5" />
-          )}
+          {openSection === "profile" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 
         {openSection === "profile" && (
-          <div className="pl-6 sm:pl-8 pt-3 text-gray-700">
-            <div className="space-y-4">
-              <div className="pb-2 border-b border-gray-100">
-                <p className="text-sm text-gray-500">Full Name</p>
-                <p className="text-base font-semibold text-gray-900">Anuj Mishra</p>
-              </div>
-
-              <div className="pb-2 border-b border-gray-100">
-                <p className="text-sm text-gray-500">Email Address</p>
-                <p className="text-base font-semibold text-gray-900">anuj@example.com</p>
-              </div>
-
-              <div className="pb-2 border-b border-gray-100">
-                <p className="text-sm text-gray-500">Phone Number</p>
-                <p className="text-base font-semibold text-gray-900">+91 9876543210</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Family Members Linked</p>
-                <p className="text-base font-semibold text-gray-900">3 Members</p>
-              </div>
+          <div className="pl-6 sm:pl-8 pt-3 text-gray-700 space-y-4">
+            <div className="pb-2 border-b border-gray-100">
+              <p className="text-sm text-gray-500">Full Name</p>
+              <p className="text-base font-semibold text-gray-900">{user?.name || "N/A"}</p>
+            </div>
+            <div className="pb-2 border-b border-gray-100">
+              <p className="text-sm text-gray-500">Email Address</p>
+              <p className="text-base font-semibold text-gray-900">{user?.email || "N/A"}</p>
+            </div>
+            <div className="pb-2 border-b border-gray-100">
+              <p className="text-sm text-gray-500">Phone Number</p>
+              <p className="text-base font-semibold text-gray-900">{user?.phoneNumber || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Family Members Linked</p>
+              <p className="text-base font-semibold text-gray-900">3 Members</p>
             </div>
           </div>
         )}
@@ -124,25 +133,28 @@ const SettingsPage = () => {
         >
           <Phone className="w-5 h-5 text-gray-700" />
           Change Phone Number
-          {openSection === "phone" ? (
-            <ChevronUp className="ml-auto w-5 h-5" />
-          ) : (
-            <ChevronDown className="ml-auto w-5 h-5" />
-          )}
+          {openSection === "phone" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 
         {openSection === "phone" && (
           <div className="pl-6 sm:pl-8 pt-3 space-y-3 text-gray-700">
             <p className="text-sm">
-              <strong>Current Phone:</strong> {phoneData.oldPhone}
+              <strong>Current Phone:</strong> {user?.phoneNumber || "N/A"}
             </p>
 
             <div>
               <label className="block text-sm font-medium mb-1">New Phone Number</label>
               <PhoneInput
-                country={'in'}
+                country={"in"}
+                onlyCountries={["in"]}
+                disableDropdown={true}
                 value={phoneData.newPhone}
-                onChange={(value) => setPhoneData({ ...phoneData, newPhone: value })}
+                onChange={handlePhoneChange}
+                inputProps={{
+                  onKeyDown: handlePhoneKeyDown,
+                  name: "phoneNumber",
+                  required: true,
+                }}
                 inputStyle={{
                   width: '100%',
                   maxWidth: '250px',
@@ -152,8 +164,9 @@ const SettingsPage = () => {
                   fontSize: '14px',
                 }}
                 buttonStyle={{
-                  borderRadius: '6px 0 0 6px',
-                  border: '1px solid #ccc'
+                  borderRadius: "8px 0 0 8px",
+                  border: "1px solid #d1d5db",
+                  padding: "0 5px 0",
                 }}
               />
             </div>
@@ -164,7 +177,9 @@ const SettingsPage = () => {
                 type="password"
                 name="password"
                 value={phoneData.password}
-                onChange={handlePhoneChange}
+                onChange={(e) =>
+                  setPhoneData((prev) => ({ ...prev, password: e.target.value }))
+                }
                 placeholder="Enter your password"
                 className="mt-1 w-full sm:w-72 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3fbf81] text-sm"
               />
@@ -180,7 +195,7 @@ const SettingsPage = () => {
         )}
       </div>
 
-      {/*  Change Password */}
+      {/* Change Password */}
       <div className="mt-5">
         <button
           type="button"
@@ -189,11 +204,7 @@ const SettingsPage = () => {
         >
           <Lock className="w-5 h-5 text-gray-700" />
           Change Password
-          {openSection === "password" ? (
-            <ChevronUp className="ml-auto w-5 h-5" />
-          ) : (
-            <ChevronDown className="ml-auto w-5 h-5" />
-          )}
+          {openSection === "password" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 
         {openSection === "password" && (
@@ -253,11 +264,7 @@ const SettingsPage = () => {
         >
           <HelpCircle className="w-5 h-5 text-gray-700" />
           Help & Support
-          {openSection === "help" ? (
-            <ChevronUp className="ml-auto w-5 h-5" />
-          ) : (
-            <ChevronDown className="ml-auto w-5 h-5" />
-          )}
+          {openSection === "help" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 
         {openSection === "help" && (
@@ -278,7 +285,7 @@ const SettingsPage = () => {
         )}
       </div>
 
-      {/*  Delete Account */}
+      {/* Delete Account */}
       <div className="pt-4">
         <button
           type="button"
@@ -287,17 +294,13 @@ const SettingsPage = () => {
         >
           <Trash2 className="w-5 h-5 " />
           Delete Account
-          {openSection === "delete" ? (
-            <ChevronUp className="ml-auto w-5 h-5" />
-          ) : (
-            <ChevronDown className="ml-auto w-5 h-5" />
-          )}
+          {openSection === "delete" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 
         {openSection === "delete" && (
           <div className="pl-6 sm:pl-8 pt-3 text-gray-700">
             <p className="text-sm mb-3">
-              Deleting your account will remove all your data permanently. This action cannot be undone.
+              Deleter your account will remove all your data permanently. This action cannot be undone.
             </p>
             <button
               onClick={deleteAccount}

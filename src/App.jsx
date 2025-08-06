@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react"; // Added useEffect here for Layout logs
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -6,7 +6,7 @@ import Footer from "./components/Footer";
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from "./components/PublicRoute";
 
-//   Pages
+// Pages
 import Home from "./components/pages/Home";
 import Login from "./components/pages/Login";
 import Register from "./components/pages/Register";
@@ -22,33 +22,47 @@ import NotFound from "./components/pages/404";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-phone-input-2/lib/style.css";
-
+import VerifyOtp from "./components/pages/VerifyOtp";
 
 function Layout() {
   const location = useLocation();
 
-  //   Sidebar visible only on these pages
-  const showSidebar = ["/dashboard", "/family", "/schedule", "/history", "/settings", "/family-members","/family/undefined","/call-details"].includes(location.pathname);
+  // ✅ CORRECTED LOGIC: Use a more flexible check for the family member details route
+  const showSidebar = [
+    "/dashboard",
+    "/family-members",
+    "/schedule",
+    "/history",
+    "/settings",
+    "/call-details"
+  ].includes(location.pathname) || location.pathname.startsWith("/family/");
+
+  // ✅ Add mount/unmount logs to Layout
+  useEffect(() => {
+    console.log("Layout Component Mounted!");
+    return () => {
+      console.log("Layout Component Unmounted!");
+    };
+  }, []); // Empty dependency array ensures it runs once on mount/unmount
+
 
   return (
     <div className="flex flex-col ">
-      {/*   Navbar always at the top */}
       <Navbar />
 
       <div className="flex max-h-fit min-h-screen flex-1 shadow-xs mb-10">
-        {/*   Sidebar only for dashboard-related pages */}
         {showSidebar && <Sidebar />}
 
-        {/*   Main Content */}
         <div className="flex-1 flex flex-col bg-white">
-          <main className="flex-1 p-6 md:p-10">
+          <main className="flex-1 p-6 md:p-8">
             <Routes>
-              {/*  Public Pages */}
-              <Route path="/" element={  <Home /> } />
-              <Route path="/login" element={<PublicRoute> <Login /> </PublicRoute>}  />
+              {/* Public Pages */}
+              <Route path="/" element={  <Home /> } />
+              <Route path="/login" element={<PublicRoute> <Login /> </PublicRoute>}  />
               <Route path="/signup" element={<PublicRoute> <Register /> </PublicRoute>} />
+              <Route path="/verify-otp" element={<VerifyOtp />} />
 
-              {/*  Dashboard Pages */}
+              {/* Dashboard Pages */}
               <Route path="/dashboard" element={<ProtectedRoute> <Dashboard /> </ProtectedRoute>} />
               <Route path="/family-members" element={<ProtectedRoute> <FamilyMembers /> </ProtectedRoute>} />
               <Route path="/family/:id" element={<ProtectedRoute> <FamilyMembersDetails /> </ProtectedRoute>} />
@@ -59,9 +73,6 @@ function Layout() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-
-          {/*   Footer stays at bottom */}
-
         </div>
       </div>
       <Footer />
@@ -73,7 +84,6 @@ export default function App() {
   return (
     <Router>
       <Layout />
-      {/*   Toast Notifications */}
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </Router>
   );
