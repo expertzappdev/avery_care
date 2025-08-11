@@ -1,23 +1,25 @@
 // src/redux/store.js
 
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import createSagaMiddleware from 'redux-saga';
-import authReducer from './authSlice';
-import familyReducer from './familySlice'; // ✅ ADD THIS
-import rootSaga from './sagas';
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import createSagaMiddleware from "redux-saga";
+import authReducer from "./authSlice";
+import familyReducer from "./familySlice"; // ✅ ADD THIS
+import rootSaga from "./sagas";
+import callReducer from "./callSlice"; // Assuming you have a callSlice
 
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
 const persistConfig = {
-  key: 'root',
+  key: "root",
   storage,
-  whitelist: ['auth'],
+  whitelist: ["auth"],
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
   family: familyReducer, // ✅ ADD THIS
+  call:callReducer, // Assuming you have a callReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

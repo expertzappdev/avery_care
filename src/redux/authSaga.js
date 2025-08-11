@@ -1,4 +1,3 @@
-// redux/authSaga.js
 import { call, put, takeLatest } from 'redux-saga/effects';
 import {
   loginRequest,
@@ -11,8 +10,8 @@ import {
   verifyOtpSuccess,
   verifyOtpFailure,
 } from './authSlice';
+import { toast } from 'react-toastify';
 
-// ✅ API base URL - make sure this is correct for your backend
 const API_BASE_URL = 'http://localhost:5000/api/auth';
 
 // ✅ Signup worker
@@ -28,11 +27,14 @@ function* signupWorker(action) {
 
     if (response.success) {
       yield put(signupSuccess({ email: action.payload.email }));
+      toast.success(response.message || "Signup successful! Please verify OTP");
     } else {
       yield put(signupFailure(response.message || 'Signup failed. Please try again.'));
+      toast.error(response.message || 'Signup failed');
     }
   } catch (error) {
     yield put(signupFailure(error.message || 'Network error during signup.'));
+    toast.error(error.message || 'Network error during signup');
   }
 }
 
@@ -46,14 +48,17 @@ function* loginWorker(action) {
         body: JSON.stringify(action.payload),
       }).then(res => res.json())
     );
+    console.log('Login API response:', response); // <-- Add this line
     if (response.success) {
-      // Corrected: Pass the entire response object as the 'user' payload.
       yield put(loginSuccess({ user: response }));
+      toast.success(response.message || "Login successful. Welcome back!");
     } else {
       yield put(loginFailure(response.message || 'Login failed. Invalid credentials.'));
+      toast.error(response.message || 'Login failed');
     }
   } catch (error) {
     yield put(loginFailure(error.message || 'Network error during login.'));
+    toast.error(error.message || 'Network error during login');
   }
 }
 
@@ -68,13 +73,15 @@ function* verifyOtpWorker(action) {
       }).then(res => res.json())
     );
     if (response.success) {
-      // Corrected: Pass the entire response object as the 'user' payload.
       yield put(verifyOtpSuccess({ user: response }));
+      toast.success(response.message || "OTP verified successfully");
     } else {
       yield put(verifyOtpFailure(response.message || 'OTP verification failed.'));
+      toast.error(response.message || 'OTP verification failed ❌');
     }
   } catch (error) {
     yield put(verifyOtpFailure(error.message || 'Network error during OTP verification.'));
+    toast.error(error.message || 'OTP verification failed ❌');
   }
 }
 

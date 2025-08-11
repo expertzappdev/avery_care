@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchFamilyMembersRequest } from "../../../redux/familySlice";
 import {
   User,
   Phone,
@@ -86,6 +88,16 @@ const SettingsPage = () => {
     }
   };
 
+  const dispatch = useDispatch();
+
+useEffect(() => {
+  dispatch(fetchFamilyMembersRequest());
+}, [dispatch]);
+
+const familyMembers = useSelector((state) => state.family.familyMembers);
+  const familyCount = familyMembers?.length || 0;
+
+
   return (
     <div className="min-h-screen bg-white px-6 sm:px-10">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Settings</h2>
@@ -118,7 +130,7 @@ const SettingsPage = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Family Members Linked</p>
-              <p className="text-base font-semibold text-gray-900">3 Members</p>
+              <p className="text-base font-semibold text-gray-900">{familyCount}</p>
             </div>
           </div>
         )}

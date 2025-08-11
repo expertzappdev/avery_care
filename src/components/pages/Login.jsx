@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginRequest, clearError } from "../../redux/authSlice"; // Removed clearSuccessMessage as it's not relevant for login success
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -23,7 +23,6 @@ export default function Login() {
   // Login success logic: checks for isAuthenticated
   useEffect(() => {
     if (isAuthenticated) {
-      toast.success("Welcome back!", { position: "top-right" });
       navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]); // Added navigate to the dependency array
@@ -31,7 +30,6 @@ export default function Login() {
   // Error logic: checks for error state
   useEffect(() => {
     if (error) {
-      toast.error(error, { position: "top-right" });
       dispatch(clearError());
     }
   }, [error, dispatch]);

@@ -1,4 +1,6 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { scheduleHealthCallRequest } from "../../../redux/callSlice";
+import { toast } from "react-toastify";
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +30,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 export default function Dashboard() {
   const navigate=useNavigate()
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
   // Emojis top-to-bottom (Happy → Overwhelmed)
@@ -87,6 +90,27 @@ export default function Dashboard() {
     { mood: "Overwhelmed", icon: <BoltIcon className="w-5 h-5 text-red-500" /> },
   ];
 
+  const handleSelfCall = () => {
+    if (!user?._id) {
+      alert("User ID not found! Please login again.");
+      return;
+    }
+try{
+dispatch(
+      scheduleHealthCallRequest({
+        scheduledTo: user._id, // ✅ apna khud ka ID
+        scheduledAt: new Date().toISOString(), // ✅ abhi ka time
+      })
+    )
+     toast.success("Call scheduled successfully! 📞");
+  }
+ 
+catch (error) {
+      toast.error(error?.message || "Failed to schedule call ❌");
+    }
+  }
+    
+
   return (
     <div className="bg-white min-h-screen sm:px-8 lg:px-12 space-y-12 pb-12">
       
@@ -112,7 +136,7 @@ export default function Dashboard() {
           <PhoneIcon className="w-4 h-4" />
           Schedule a New Call
         </button>
-        <button className="flex items-center justify-center gap-2 px-4 py-2 bg-[#e6f8f0] text-[#3fbf81] font-medium rounded-full shadow hover:bg-[#d4f3e7] transition w-full sm:w-auto text-sm">
+        <button onClick={handleSelfCall} className="flex items-center justify-center gap-2 px-4 py-2 bg-[#e6f8f0] text-[#3fbf81] font-medium rounded-full shadow hover:bg-[#d4f3e7] transition w-full sm:w-auto text-sm">
           <BoltIcon className="w-4 h-4" />
           Request an Immediate Call
         </button>
