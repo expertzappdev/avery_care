@@ -18,11 +18,11 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="min-h-screen bg-white border-r border-gray-200 flex flex-col w-20 md:w-72 transition-all duration-300 pt-8">
+    <aside className="min-h-screen bg-white border-r border-gray-200 flex flex-col w-16 md:w-72 transition-all duration-300 pt-8">
       {/*   Sidebar Navbar ke neeche start hota hai */}
 
       {/*   Navigation */}
-      <nav className="flex flex-col gap-2 mt-4">
+      <nav className="flex flex-col gap-2 mt-0 md:mt-4">
         {navItems.map((item) => (
           <NavLink
             key={item.id}

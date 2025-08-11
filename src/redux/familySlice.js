@@ -1,10 +1,11 @@
+// redux/familySlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   familyMembers: [],
+  selectedFamilyMember: null, // ✅ for detail page
   loading: false,
   error: null,
-  // ❌ Removed successMessage from initial state
 };
 
 const familySlice = createSlice({
@@ -13,57 +14,66 @@ const familySlice = createSlice({
   reducers: {
     fetchFamilyMembersRequest: (state) => {
       state.loading = true;
-      state.error = null; // Clear previous error
-      // ❌ Removed successMessage clearing
+      state.error = null;
     },
     fetchFamilyMembersSuccess: (state, action) => {
       state.loading = false;
       state.familyMembers = action.payload;
       state.error = null;
-      // ❌ Removed successMessage setting
     },
     fetchFamilyMembersFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
-      // ❌ Removed successMessage clearing
     },
 
     addFamilyMemberRequest: (state) => {
       state.loading = true;
       state.error = null;
-      // ❌ Removed successMessage clearing
     },
     addFamilyMemberSuccess: (state) => {
       state.loading = false;
       state.error = null;
-      // ❌ Removed successMessage setting
     },
     addFamilyMemberFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
-      // ❌ Removed successMessage clearing
     },
 
     deleteFamilyMemberRequest: (state) => {
       state.loading = true;
       state.error = null;
-      // ❌ Removed successMessage clearing
     },
     deleteFamilyMemberSuccess: (state) => {
       state.loading = false;
       state.error = null;
-      // ❌ Removed successMessage setting
     },
     deleteFamilyMemberFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
-      // ❌ Removed successMessage clearing
     },
-    // ❌ Removed clearMessages reducer
-    // clearMessages: (state) => {
-    //   state.error = null;
-    //   state.successMessage = null;
-    // }
+
+    updateFamilyMemberRequest: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    updateFamilyMemberSuccess: (state, action) => {
+      state.loading = false;
+      state.error = null;
+      // update in list
+      const index = state.familyMembers.findIndex((m) => m._id === action.payload._id);
+      if (index !== -1) {
+        state.familyMembers[index] = action.payload;
+      }
+      state.selectedFamilyMember = action.payload; // update selected
+    },
+    updateFamilyMemberFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    setSelectedFamilyMember: (state, action) => {
+      state.selectedFamilyMember = action.payload;
+    },
   },
 });
 
@@ -77,7 +87,10 @@ export const {
   deleteFamilyMemberRequest,
   deleteFamilyMemberSuccess,
   deleteFamilyMemberFailure,
-  // ❌ Removed clearMessages export
+  updateFamilyMemberRequest,
+  updateFamilyMemberSuccess,
+  updateFamilyMemberFailure,
+  setSelectedFamilyMember,
 } = familySlice.actions;
 
-export default familySlice.reducer; // ✅ Corrected from Slice.reducer
+export default familySlice.reducer;

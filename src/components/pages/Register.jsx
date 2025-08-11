@@ -6,14 +6,16 @@ import {
 } from "../../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 export default function Signup() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, successMessage, email } = useSelector((state) => state.auth);
+  const { loading, error, successMessage, email } = useSelector(
+    (state) => state.auth
+  );
 
   const [formData, setFormData] = useState({
     name: "",
@@ -29,7 +31,7 @@ export default function Signup() {
   const handlePhoneChange = (value, country) => {
     setFormData((prevData) => ({
       ...prevData,
-      phoneNumber: `+${value}`, // Store with '+' prefix
+      phoneNumber: value, // Example: '919876543210'
     }));
   };
 
@@ -43,25 +45,30 @@ export default function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log("Submitting signup form with data:", formData);
-    dispatch(signupRequest(formData));
+
+    // 🧠 Remove country code (91) if present
+    const plainPhoneNumber =
+      formData.phoneNumber.startsWith("91")
+        ? formData.phoneNumber.slice(2)
+        : formData.phoneNumber;
+
+    const cleanData = {
+      ...formData,
+      phoneNumber: plainPhoneNumber,
+    };
+
+    dispatch(signupRequest(cleanData));
   };
 
-  // Effect for success message and redirection
   useEffect(() => {
-    console.log("Signup useEffect - successMessage:", successMessage, "email:", email);
     if (successMessage && email) {
-      toast.success(successMessage, { position: "top-right" });
-      navigate("/verify-otp", { state: { email } });
+      navigate("/verify-otp", { state: { email: formData.email, phone: formData.phoneNumber } });
       dispatch(clearSuccessMessage());
     }
   }, [successMessage, email, navigate, dispatch]);
 
-  // Effect for error messages
   useEffect(() => {
-    console.log("Signup useEffect - error:", error);
     if (error) {
-      toast.error(error, { position: "top-right" });
       dispatch(clearError());
     }
   }, [error, dispatch]);

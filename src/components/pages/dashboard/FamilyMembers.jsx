@@ -11,11 +11,13 @@ import {
 } from "../../../redux/familySlice";
 import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+
 export default function FamilyMembers() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  // ❌ Removed successMessage from destructuring as it's no longer used for toasts
   const { familyMembers: familyList, loading, error } = useSelector(
     (state) => state.family
   );
@@ -31,31 +33,17 @@ export default function FamilyMembers() {
     dispatch(fetchFamilyMembersRequest());
   }, [dispatch]);
 
-  // ❌ Removed useEffect to show toast notifications for errors and success messages
-  // useEffect(() => {
-  //   if (error) {
-  //     toast.error(error);
-  //     dispatch(clearMessages()); // Clear error after displaying
-  //   }
-  //   if (successMessage) {
-  //     toast.success(successMessage);
-  //     dispatch(clearMessages()); // Clear success message after displaying
-  //   }
-  // }, [error, successMessage, dispatch]);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleAddMember = () => {
-    // Basic client-side validation
     if (
       !formData.name ||
       !formData.relationship ||
       !formData.email ||
       !formData.phoneNumber
     ) {
-      // ❌ Replaced toast with a simple alert or console log if you want
       alert("Please fill in ALL required fields (Name, Relationship, Email, Phone Number).");
       return;
     }
@@ -79,9 +67,6 @@ export default function FamilyMembers() {
 
   return (
     <div className="flex flex-col md:flex-row px-5 sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
-      {/* ❌ ToastContainer no longer relevant for this component */}
-
-      {/* LEFT: FORM SECTION */}
       <div className="flex-1 rounded-xl space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
           Add Family Member
@@ -97,12 +82,6 @@ export default function FamilyMembers() {
               placeholder: "Enter relationship",
             },
             { label: "Email", name: "email", type: "email", placeholder: "Enter email" },
-            {
-              label: "Phone Number",
-              name: "phoneNumber",
-              type: "text",
-              placeholder: "Enter phone number",
-            },
           ].map((field, idx) => (
             <div key={idx}>
               <label className="block font-medium mb-2 text-gray-700">
@@ -119,11 +98,41 @@ export default function FamilyMembers() {
             </div>
           ))}
 
-          {/* Add Button */}
+          <div>
+  <label className="block font-medium mb-2 text-gray-700">Phone Number</label>
+  <PhoneInput
+    country={"in"}
+    onlyCountries={["in"]}
+    countryCodeEditable={false}
+    disableDropdown={true} // 🔒 Lock flag dropdown
+    value={`91${formData.phoneNumber}`} // internally uses full
+    onChange={(value) => {
+      // Remove +91 if present
+      const cleaned = value.replace(/^91/, "");
+      if (/^\d{0,10}$/.test(cleaned)) {
+        setFormData({ ...formData, phoneNumber: cleaned });
+      }
+    }}
+    inputStyle={{
+      width: "93.5%",
+      marginLeft:'30px',
+      borderRadius: "0.375rem",
+      padding: "0.5rem 1rem",
+      height:' 42px',
+      border: "1px solid #d1d5db",
+    }}
+    containerStyle={{
+      width: "100%",
+    }}
+  />
+</div>
+
+
+
           <div className="flex justify-center mt-6">
             <button
               onClick={handleAddMember}
-              disabled={loading} // Disable button when loading
+              disabled={loading}
               className={`flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base ${
                 loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -163,63 +172,38 @@ export default function FamilyMembers() {
         </div>
       </div>
 
-      {/* RIGHT: FAMILY MEMBERS LIST */}
       <div className="flex-1 mt-4 md:mt-4 rounded-xl">
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           Added Family Members
         </h2>
 
-        {/* Logged-in User */}
-        {user?.name && (
-          <div className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition border-b border-gray-200">
-            <div>
-              <p className="font-medium text-lg text-gray-900">
-                {user.name} <span className="text-sm text-gray-500">(You)</span>
-              </p>
-              <p className="text-sm text-gray-500">Self</p>
-            </div>
-            <button
-              onClick={() => handleDetails(user)}
-              className="px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition"
-            >
-              Details
-            </button>
-          </div>
-        )}
-
-        {/* Display loading message for family list fetch */}
         {loading && familyList.length === 0 && (
           <p className="text-gray-500 italic mt-4">
             Loading family members...
           </p>
         )}
 
-        {/* Display no members message */}
         {!loading && familyList.length === 0 ? (
           <p className="text-gray-500 italic mt-4">
             No family members added yet.
           </p>
         ) : (
           <div className="divide-y divide-gray-200">
-            {familyList.map((member) => (
+            {Array.isArray(familyList) && familyList.map((member) => (
               <div
                 key={member._id}
                 className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
               >
-                {/* MIDDLE: MEMBER DETAILS */}
                 <div>
                   <p className="font-medium text-lg text-gray-900">
                     {member.name}
                   </p>
                   <p className="text-sm text-gray-500">{member.relationship}</p>
                 </div>
-
-                {/* RIGHT: ACTION BUTTONS */}
                 <div className="flex items-center gap-3">
-                  {/* Delete Button just before Details */}
                   <button
                     onClick={() => handleDelete(member._id)}
-                    disabled={loading} // Disable delete button when loading
+                    disabled={loading}
                     className={`text-red-500 hover:text-red-700 transition ${
                       loading ? "opacity-50 cursor-not-allowed" : ""
                     }`}
@@ -227,11 +211,9 @@ export default function FamilyMembers() {
                   >
                     <TrashIcon className="w-5 h-5" />
                   </button>
-
-                  {/* Details Button */}
                   <button
                     onClick={() => handleDetails(member)}
-                    disabled={loading} // Disable details button when loading
+                    disabled={loading}
                     className={`px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition ${
                       loading ? "opacity-50 cursor-not-allowed" : ""
                     }`}

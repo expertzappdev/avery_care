@@ -8,7 +8,11 @@ import {
   addFamilyMemberFailure,
   deleteFamilyMemberRequest,
   deleteFamilyMemberFailure,
-} from "./familySlice"; // Updated import from familySlice
+  updateFamilyMemberRequest,
+  updateFamilyMemberSuccess,
+  updateFamilyMemberFailure,
+} from "./familySlice";
+import { toast } from "react-toastify"; // ✅ Toast import
 
 const selectAuthToken = (state) => state.auth.user?.token;
 const API_BASE_URL = "http://localhost:5000/api/family";
@@ -16,87 +20,83 @@ const API_BASE_URL = "http://localhost:5000/api/family";
 function* fetchFamilyMembersSaga() {
   try {
     const token = yield select(selectAuthToken);
-    const config = { headers: { "Content-Type": "application/json" } };
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      yield put(
-        fetchFamilyMembersFailure("User not authenticated. Please log in.")
-      );
-      return;
-    }
-
-    // yield put(fetchFamilyMembersRequest()); // ❌ Removed: Request action already sets loading
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
     const response = yield call(() =>
       axios.get(`${API_BASE_URL}/fetchFamilyMembers`, config)
     );
     yield put(fetchFamilyMembersSuccess(response.data));
+    // toast.success(response.data.message || "Family members fetched successfully");
   } catch (error) {
-    let errorMessage = "Failed to fetch family members. Please try again.";
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage = error.response.data.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    yield put(fetchFamilyMembersFailure(errorMessage));
+    const errMsg = error?.response?.data?.message || error.message || "Failed to fetch family members";
+    yield put(fetchFamilyMembersFailure(errMsg));
+    toast.error(errMsg);
   }
 }
 
 function* addFamilyMemberSaga(action) {
   try {
     const token = yield select(selectAuthToken);
-    const config = { headers: { "Content-Type": "application/json" } };
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      yield put(addFamilyMemberFailure("User not authenticated. Please log in."));
-      return;
-    }
-
-    yield call(() => axios.post(API_BASE_URL, action.payload, config));
-    yield put(fetchFamilyMembersRequest()); // Refresh after add
-    // yield put(addFamilyMemberSuccess(response.data.message || 'Family member added successfully!')); // ❌ Removed success message
-    // You can still dispatch addFamilyMemberSuccess() without a payload if you want to explicitly signal completion in the slice.
-    // For now, I'm just leaving it as a refresh. If you want it, uncomment the line below without the message.
-    // yield put(addFamilyMemberSuccess());
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const response = yield call(() => axios.post(API_BASE_URL, action.payload, config));
+    yield put(fetchFamilyMembersRequest());
+    toast.success(response.data.message || "Family member added successfully");
   } catch (error) {
-    let errorMessage = "Failed to add family member. Please try again.";
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage = error.response.data.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    yield put(addFamilyMemberFailure(errorMessage));
+    const errMsg = error?.response?.data?.message || error.message || "Failed to add family member";
+    yield put(addFamilyMemberFailure(errMsg));
+    toast.error(errMsg);
   }
 }
 
 function* deleteFamilyMemberSaga(action) {
   try {
     const token = yield select(selectAuthToken);
-    const config = { headers: { "Content-Type": "application/json" } };
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      yield put(
-        deleteFamilyMemberFailure("User not authenticated. Please log in.")
-      );
-      return;
-    }
-
-    yield call(() => axios.delete(`${API_BASE_URL}/${action.payload}`, config));
-    yield put(fetchFamilyMembersRequest()); // Refresh after delete
-    // yield put(deleteFamilyMemberSuccess(response.data.message || 'Family member deleted successfully!')); // ❌ Removed success message
-    // You can still dispatch deleteFamilyMemberSuccess() without a payload if you want to explicitly signal completion in the slice.
-    // For now, I'm just leaving it as a refresh. If you want it, uncomment the line below without the message.
-    // yield put(deleteFamilyMemberSuccess());
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const response = yield call(() =>
+      axios.delete(`${API_BASE_URL}/${action.payload}`, config)
+    );
+    yield put(fetchFamilyMembersRequest());
+    toast.success(response.data.message || "Family member deleted successfully");
   } catch (error) {
-    let errorMessage = "Failed to delete family member. Please try again.";
-    if (error.response && error.response.data && error.response.data.message) {
-      errorMessage = error.response.data.message;
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-    yield put(deleteFamilyMemberFailure(errorMessage));
+    const errMsg = error?.response?.data?.message || error.message || "Failed to delete family member";
+    yield put(deleteFamilyMemberFailure(errMsg));
+    toast.error(errMsg);
+  }
+}
+
+function* updateFamilyMemberSaga(action) {
+  try {
+    const token = yield select(selectAuthToken);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    const { id, updatedData } = action.payload;
+    const response = yield call(() =>
+      axios.put(`${API_BASE_URL}/${id}`, updatedData, config)
+    );
+    yield put(updateFamilyMemberSuccess(response.data));
+    toast.success(response.data.message || "Family member updated successfully");
+  } catch (error) {
+    const errMsg = error?.response?.data?.message || error.message || "Failed to update family member";
+    yield put(updateFamilyMemberFailure(errMsg));
+    toast.error(errMsg);
   }
 }
 
@@ -104,4 +104,5 @@ export default function* familySaga() {
   yield takeLatest(fetchFamilyMembersRequest.type, fetchFamilyMembersSaga);
   yield takeLatest(addFamilyMemberRequest.type, addFamilyMemberSaga);
   yield takeLatest(deleteFamilyMemberRequest.type, deleteFamilyMemberSaga);
+  yield takeLatest(updateFamilyMemberRequest.type, updateFamilyMemberSaga);
 }
