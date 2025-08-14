@@ -11,62 +11,80 @@ import {
 import { toast } from "react-toastify";
 
 import { fetchFamilyMembersRequest } from "../../../redux/familySlice";
-import { scheduleHealthCallRequest } from "../../../redux/callSlice";
+import {
+  scheduleHealthCallRequest,
+  fetchScheduledCallsRequest,
+  updateScheduledCallRequest,
+  deleteScheduledCallRequest,
+  clearCallMessages,
+} from "../../../redux/callSlice";
 
 export default function ScheduleHealthCall() {
   const [selectedMember, setSelectedMember] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [editingId, setEditingId] = useState(null);
-  const [calls, setCalls] = useState([
-    {
-      id: 1,
-      member: "Ethan Carter",
-      phone: "+91 9876543210",
-      date: "2025-08-10",
-      time: "10:00",
-    },
-    {
-      id: 2,
-      member: "Sophia Carter",
-      phone: "+91 9123456780",
-      date: "2025-08-12",
-      time: "15:30",
-    },
-  ]);
+  const [editedDate, setEditedDate] = useState("");
+  const [editedTime, setEditedTime] = useState("");
 
   const dispatch = useDispatch();
   const { familyMembers } = useSelector((state) => state.family);
   const { user } = useSelector((state) => state.auth);
 
-  const { loading, error, scheduledCalls } = useSelector((state) => state.call);
+  const { loading, error, scheduledCalls, message } = useSelector(
+    (state) => state.call
+  );
+
+  // Filter for ONLY pending calls to display on this specific page
+  const allFetchedCalls = Object.values(scheduledCalls || {});
+  const pendingCallsArray = allFetchedCalls.filter(
+    (call) => call.status === "pending"
+  );
 
   const allMembers = [
-    ...(user?.name ? [{ _id: "self", name: user.name }] : []),
+    ...(user?.name ? [{ _id: user._id, name: user.name }] : []),
     ...(familyMembers || []),
   ];
+
+  // --- Logic to prevent past date/time selection ---
+  const now = new Date();
+  const todayDate = now.toISOString().split("T")[0];
+  const nowTime = now.toTimeString().slice(0, 5);
+
+  const minTimeForToday = selectedDate === todayDate ? nowTime : "00:00";
+  // --- End of logic ---
 
   useEffect(() => {
     dispatch(fetchFamilyMembersRequest());
   }, [dispatch]);
 
-  // Listen for backend success/error and show toast
   useEffect(() => {
-    if (loading) {
-      toast.info("⏳ Scheduling health call...", { autoClose: 2000 });
+    if (user?._id) {
+      dispatch(fetchScheduledCallsRequest({ userId: user._id }));
     }
+  }, [dispatch, user]);
+
+  useEffect(() => {
     if (error) {
       toast.error(`❌ Error: ${error}`);
+      dispatch(clearCallMessages());
     }
-    if (scheduledCalls.length > 0) {
-      const lastScheduled = scheduledCalls[scheduledCalls.length - 1];
-      toast.success(lastScheduled?.message || "✅ Health call scheduled successfully!");
+    if (message) {
+      toast.success(`✅ ${message}`);
+      dispatch(clearCallMessages());
     }
-  }, [loading, error, scheduledCalls]);
+  }, [error, message, dispatch]);
 
   const handleSchedule = () => {
     if (!selectedMember || !selectedDate || !selectedTime) {
       toast.error("⚠️ Please fill all fields before scheduling.");
+      return;
+    }
+
+    // --- Final validation to block past times ---
+    const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
+    if (selectedDateTime < now) {
+      toast.error("⚠️ You cannot schedule a call in the past.");
       return;
     }
 
@@ -82,9 +100,9 @@ export default function ScheduleHealthCall() {
 
     if (selectedMemberObject) {
       const scheduledToId =
-        selectedMemberObject._id === "self" ? user._id : selectedMemberObject._id;
+        selectedMemberObject._id === user._id ? user._id : selectedMemberObject._id;
 
-      const scheduledAtDateTime = `${selectedDate}T${selectedTime}:00`;
+      const scheduledAtDateTime = selectedDateTime.toISOString();
 
       dispatch(
         scheduleHealthCallRequest({
@@ -101,22 +119,51 @@ export default function ScheduleHealthCall() {
     setSelectedTime("");
   };
 
-  const handleEdit = (id) => {
-    setEditingId(editingId === id ? null : id);
+  const handleEdit = (callId, currentScheduledAt) => {
+    setEditingId(editingId === callId ? null : callId);
+    if (editingId !== callId) {
+      const date = new Date(currentScheduledAt);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      setEditedDate(`${year}-${month}-${day}`);
+      setEditedTime(`${hours}:${minutes}`);
+    }
   };
 
-  const handleUpdate = (id, newDate, newTime) => {
-    setCalls((prev) =>
-      prev.map((call) =>
-        call.id === id ? { ...call, date: newDate, time: newTime } : call
-      )
+  const handleUpdate = (callId) => {
+    if (!editedDate || !editedTime) {
+      toast.error("⚠️ Please select new date and time for update.");
+      return;
+    }
+
+    const newScheduledAt = `${editedDate}T${editedTime}:00`;
+    dispatch(
+      updateScheduledCallRequest({ id: callId, scheduledAt: newScheduledAt })
     );
     setEditingId(null);
+  };
+
+  const handleDelete = (callId) => {
+    if (window.confirm("Are you sure you want to delete this scheduled call?")) {
+      dispatch(deleteScheduledCallRequest(callId));
+    }
   };
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-GB");
+  };
+
+  const formatTime = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
   };
 
   return (
@@ -133,7 +180,7 @@ export default function ScheduleHealthCall() {
         </p>
       </div>
 
-      {/* Form Section */}
+      {/* Form Section for Scheduling New Calls */}
       <div className="max-w-2xl space-y-8">
         {/* Member Dropdown */}
         <div>
@@ -149,7 +196,7 @@ export default function ScheduleHealthCall() {
             <option value="">Choose a family member</option>
             {allMembers.map((member) => (
               <option key={member._id} value={member.name}>
-                {member._id === "self" ? `${member.name} (You)` : member.name}
+                {member._id === user._id ? `${member.name} (You)` : member.name}
               </option>
             ))}
           </select>
@@ -166,6 +213,7 @@ export default function ScheduleHealthCall() {
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
+            min={todayDate} // <-- Added min attribute for today's date
           />
         </div>
 
@@ -180,6 +228,7 @@ export default function ScheduleHealthCall() {
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
             className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
+            min={minTimeForToday} // <-- Added conditional min attribute for time
           />
         </div>
 
@@ -188,102 +237,128 @@ export default function ScheduleHealthCall() {
           <button
             onClick={handleSchedule}
             className="flex items-center gap-2 px-8 py-3 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105"
+            disabled={loading}
           >
             <PhoneArrowUpRightIcon className="w-5 h-5" />
-            Schedule Health Call
+            {loading ? "Scheduling..." : "Schedule Health Call"}
           </button>
         </div>
       </div>
 
-      {/* All Scheduled Calls */}
+      {/* Section for Upcoming Pending Calls */}
       <div className="max-w-2xl mt-0">
-        <h2 className="text-xl font-semibold mb-4">All Scheduled Calls</h2>
+        <h2 className="text-xl font-semibold mb-4">Upcoming Pending Calls</h2>{" "}
         <div className="space-y-4">
-          {calls.map((call) => (
-            <div
-              key={call.id}
-              className="bg-white rounded-lg p-4 border border-gray-200 shadow-xs"
-            >
-              <div className="flex justify-between items-start flex-wrap gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="w-5 h-5 text-[#3fbf81]" />
-                    <p className="text-gray-800 font-semibold text-base">
-                      {call.member}
-                    </p>
+          {pendingCallsArray.length === 0 && !loading ? (
+            <p className="text-gray-500">No upcoming pending calls.</p>
+          ) : (
+            pendingCallsArray.map((call) => (
+              <div
+                key={call._id}
+                className="bg-white rounded-lg p-4 border border-gray-200 shadow-xs"
+              >
+                <div className="flex justify-between items-start flex-wrap gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="w-5 h-5 text-[#3fbf81]" />
+                      <p className="text-gray-800 font-semibold text-base">
+                        {call.recipientName}{" "}
+                        {call.scheduledTo === user._id.toString() && "(You)"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <PhoneArrowUpRightIcon className="w-5 h-5 text-[#3fbf81]" />
+                      <p className="text-gray-700 text-sm">
+                        {call.recipientNumber}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
+                      <p className="text-gray-700 text-sm">
+                        Date: {formatDate(call.scheduledAt)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ClockIcon className="w-5 h-5 text-[#3fbf81]" />
+                      <p className="text-gray-700 text-sm">
+                        Time: {formatTime(call.scheduledAt)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          call.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : call.status === "failed"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        Status: {call.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <PhoneArrowUpRightIcon className="w-5 h-5 text-[#3fbf81]" />
-                    <p className="text-gray-700 text-sm">{call.phone}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
-                    <p className="text-gray-700 text-sm">
-                      Date: {formatDate(call.date)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ClockIcon className="w-5 h-5 text-[#3fbf81]" />
-                    <p className="text-gray-700 text-sm">Time: {call.time}</p>
-                  </div>
-                </div>
 
-                <div className="flex gap-3 items-center">
-                  <button
-                    onClick={() => handleEdit(call.id)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition"
-                    title="Edit"
-                  >
-                    <PencilSquareIcon className="w-5 h-5 text-[#3fbf81]" />
-                  </button>
-                  <button
-                    onClick={() => alert(`Delete ${call.member}`)}
-                    className="p-2 rounded-full hover:bg-gray-100 transition"
-                    title="Delete"
-                  >
-                    <TrashIcon className="w-5 h-5 text-red-500" />
-                  </button>
-                </div>
-              </div>
-
-              {editingId === call.id && (
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Date
-                    </label>
-                    <input
-                      type="date"
-                      defaultValue={call.date}
-                      onChange={(e) => (call.date = e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-1">
-                      Time
-                    </label>
-                    <input
-                      type="time"
-                      defaultValue={call.time}
-                      onChange={(e) => (call.time = e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none"
-                    />
-                  </div>
-                  <div className="text-right">
+                  <div className="flex gap-3 items-center">
+                    {call.status === "pending" && (
+                      <button
+                        onClick={() => handleEdit(call._id, call.scheduledAt)}
+                        className="p-2 rounded-full hover:bg-gray-100 transition"
+                        title="Edit"
+                        disabled={loading}
+                      >
+                        <PencilSquareIcon className="w-5 h-5 text-[#3fbf81]" />
+                      </button>
+                    )}
                     <button
-                      onClick={() =>
-                        handleUpdate(call.id, call.date, call.time)
-                      }
-                      className="text-sm bg-[#3fbf81] text-white px-4 py-2 rounded-md"
+                      onClick={() => handleDelete(call._id)}
+                      className="p-2 rounded-full hover:bg-gray-100 transition"
+                      title="Delete"
+                      disabled={loading}
                     >
-                      Save
+                      <TrashIcon className="w-5 h-5 text-red-500" />
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {editingId === call._id && (
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        New Date
+                      </label>
+                      <input
+                        type="date"
+                        value={editedDate}
+                        onChange={(e) => setEditedDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-700 mb-1">
+                        New Time
+                      </label>
+                      <input
+                        type="time"
+                        value={editedTime}
+                        onChange={(e) => setEditedTime(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none"
+                      />
+                    </div>
+                    <div className="text-right">
+                      <button
+                        onClick={() => handleUpdate(call._id)}
+                        className="text-sm bg-[#3fbf81] text-white px-4 py-2 rounded-md"
+                        disabled={loading}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

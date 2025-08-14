@@ -6,132 +6,167 @@ import {
   ClipboardDocumentListIcon,
   ChatBubbleLeftEllipsisIcon,
   CheckCircleIcon,
+  CalendarDaysIcon, // Added for consistency in formatting
+  ClockIcon, // Added for consistency in formatting
 } from "@heroicons/react/24/outline";
 
 export default function CallDetails() {
-  const { state: call } = useLocation(); 
+  const { state } = useLocation(); // state object mein { callData: call } aayega
+  const call = state?.callData; // Extract the call object from state
   const navigate = useNavigate();
 
-  //   Temporary Dummy Data
-  const [callData, setCallData] = useState({
-    date: "October 24, 2024",
-    time: "10:00 AM",
-    summary:
-      "The call with Sarah was positive and focused on her progress with the new medication. She reported feeling more energetic and experiencing fewer side effects. The conversation also touched on her upcoming doctor’s appointment and strategies for managing stress at work.",
-    topics: [
-      "Medication progress",
-      "Upcoming doctor’s appointment",
-      "Stress management",
-    ],
-    actions: ["Schedule follow-up call", "Prepare questions for doctor"],
-
-    //   Call Recordings with date + time + duration
-    recordings: [
-      {
-        id: 1,
-        title: "Morning Check-in",
-        date: "July 30, 2024",
-        time: "10:00 AM",
-        duration: "5:30",
-        url: "#",
-      },
-      {
-        id: 2,
-        title: "Follow-up Discussion",
-        date: "August 5, 2024",
-        time: "03:45 PM",
-        duration: "3:45",
-        url: "#",
-      },
-      {
-        id: 3,
-        title: "Doctor Prep Talk",
-        date: "August 15, 2024",
-        time: "11:15 AM",
-        duration: "7:10",
-        url: "#",
-      },
-    ],
-    transcript: [
-      { time: "10:00 AM", text: "Hello Sarah, how are you feeling today?" },
-      { time: "10:02 AM", text: "I’m doing much better, thank you!" },
-      { time: "10:05 AM", text: "That’s great to hear. Have you noticed any side effects?" },
-      { time: "10:07 AM", text: "Just a little tiredness, but it’s manageable." },
-      { time: "10:10 AM", text: "Do you have any questions for your upcoming doctor’s appointment?" },
-      { time: "10:12 AM", text: "I need to prepare a list. I’ll also discuss my stress levels at work." },
-    ],
+  // Initial state ko backend se aaye data se populate karein
+  // Agar 'call' object available nahi hai (e.g., direct URL access), toh default values use karein
+  const [displayData, setDisplayData] = useState({
+    recipientName: call?.recipientName || "N/A",
+    scheduledAt: call?.scheduledAt || null, // Full ISO timestamp
+    summary: call?.aiSummary || "No AI summary available for this call.", // Use aiSummary directly
+    topics: call?.topics || [], // Assuming topics might come from backend later
+    actions: call?.actions || [], // Assuming actions might come from backend later
+    recordings: call?.recordings || [], // Assuming recordings might come from backend later
+    transcript: call?.transcript || [], // Full transcript array from backend
+    audioRecordingUrl: call?.audioRecordingUrl || null, // Backend recording URL
+    durationInSeconds: call?.durationInSeconds || 0, // Duration in seconds
   });
 
-  //   Agar call history se data aaya ho to overwrite karega
+  // Jab call prop change ho (new data arrives), state update karein
   useEffect(() => {
     if (call) {
-      setCallData((prev) => ({
-        ...prev,
-        ...call,
-        topics: Array.isArray(call.topics) ? call.topics : prev.topics,
-        actions: Array.isArray(call.actions) ? call.actions : prev.actions,
-        recordings: Array.isArray(call.recordings) ? call.recordings : prev.recordings,
-        transcript: Array.isArray(call.transcript) ? call.transcript : prev.transcript,
-      }));
+      setDisplayData({
+        recipientName: call.recipientName || "N/A",
+        scheduledAt: call.scheduledAt || null,
+        summary: call.aiSummary || "No AI summary available for this call.",
+        topics: call.topics || [],
+        actions: call.actions || [],
+        recordings: call.recordings || [],
+        transcript: call.transcript || [],
+        audioRecordingUrl: call.audioRecordingUrl || null,
+        durationInSeconds: call.durationInSeconds || 0,
+      });
     }
   }, [call]);
 
+  // Helper functions for formatting (can be reused from CallHistoryTable or made local)
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString("en-GB");
+    } catch (e) {
+        return 'Invalid Date';
+    }
+  };
+
+  const formatTime = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        });
+    } catch (e) {
+        return 'Invalid Time';
+    }
+  };
+
+  const formatDuration = (totalSeconds) => {
+    if (typeof totalSeconds !== 'number' || totalSeconds < 0) return 'N/A';
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+
+  // Helper to format transcript lines (different from original as transcript has role/message)
+  const formatTranscriptLine = (line) => {
+    if (!line || !line.role || !line.message) return '';
+    // You might want to assign speaker names based on role (e.g., "AI", "User")
+    const speaker = line.role === 'assistant' ? 'AI' : 'User';
+    return `${speaker}: ${line.message}`;
+  };
+
+  // Check if call data is loaded/available
+  if (!call) {
+    return (
+      <div className="ml-8 min-h-screen bg-white p-5">
+        <p className="text-gray-500">Call data not found. Please navigate from Call History.</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-6 flex items-center gap-2 px-4 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          Back
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="ml-8 min-h-screen bg-white">
-      
-      {/*   Breadcrumb */}
+    <div className="ml-8 min-h-screen bg-white p-5">
+      {/* Breadcrumb */}
       <p className="text-sm text-gray-500">
         Calls / <span className="text-gray-700 font-medium">Call Details</span>
       </p>
 
-      {/*   Heading */}
+      {/* Heading */}
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-        Call Details
+        Call with {displayData.recipientName}
       </h1>
-      <p className="text-gray-500 text-sm mb-6">
-        {callData.date} • {callData.time}
+      <p className="text-gray-500 text-sm mb-6 flex items-center gap-2">
+        <CalendarDaysIcon className="w-4 h-4" /> {formatDate(displayData.scheduledAt)}
+        <span className="mx-1">•</span>
+        <ClockIcon className="w-4 h-4" /> {formatTime(displayData.scheduledAt)}
+        <span className="mx-1">•</span>
+        Duration: {formatDuration(displayData.durationInSeconds)}
       </p>
 
-      {/*   AI Summary Section */}
+      {/* AI Summary Section */}
       <section className="mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <ChatBubbleLeftEllipsisIcon className="w-5 h-5 text-[#3fbf81]" />
           AI-Powered Summary
         </h2>
-        <p className="text-gray-700 leading-relaxed">{callData.summary}</p>
+        <p className="text-gray-700 leading-relaxed">{displayData.summary}</p>
       </section>
 
-      {/*   Actionable Insights */}
+      {/* Actionable Insights (Topics & Actions) */}
       <section className="mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <ClipboardDocumentListIcon className="w-5 h-5 text-[#3fbf81]" />
           Actionable Insights
         </h2>
 
-        {/*   Topics */}
+        {/* Topics */}
         <div className="mb-4">
           <h3 className="text-gray-700 font-medium mb-1">Key Topics Discussed</h3>
           <ul className="list-disc list-inside text-gray-700 space-y-1">
-            {(callData.topics || []).map((topic, i) => (
-              <li key={i}>{topic}</li>
-            ))}
+            {displayData.topics.length > 0 ? (
+              displayData.topics.map((topic, i) => <li key={i}>{topic}</li>)
+            ) : (
+              <li>No key topics found.</li>
+            )}
           </ul>
         </div>
 
-        {/*   Actions */}
+        {/* Actions */}
         <div>
           <h3 className="text-gray-700 font-medium mb-1">Action Items Mentioned</h3>
           <ul className="space-y-1">
-            {(callData.actions || []).map((action, i) => (
-              <li key={i} className="flex items-center gap-2 text-gray-700">
-                <CheckCircleIcon className="w-5 h-5 text-[#3fbf81]" /> {action}
-              </li>
-            ))}
+            {displayData.actions.length > 0 ? (
+              displayData.actions.map((action, i) => (
+                <li key={i} className="flex items-center gap-2 text-gray-700">
+                  <CheckCircleIcon className="w-5 h-5 text-[#3fbf81]" /> {action}
+                </li>
+              ))
+            ) : (
+              <li>No action items mentioned.</li>
+            )}
           </ul>
         </div>
       </section>
 
-      {/*   MULTIPLE RECORDINGS SECTION */}
+      {/* Call Recordings Section */}
       <section className="mb-8">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
           <PlayCircleIcon className="w-5 h-5 text-[#3fbf81]" />
@@ -139,39 +174,76 @@ export default function CallDetails() {
         </h2>
 
         <div className="space-y-3">
-          {(callData.recordings || []).map((rec) => (
+          {displayData.audioRecordingUrl ? ( // Check for a single audioRecordingUrl
             <div
-              key={rec.id}
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-100 p-4 rounded-lg"
             >
               <div className="mb-2 sm:mb-0">
-                <h4 className="text-gray-800 font-medium">{rec.title}</h4>
+                <h4 className="text-gray-800 font-medium">Full Call Recording</h4>
                 <p className="text-gray-500 text-sm">
-                  {rec.date} • {rec.time} • {rec.duration} min
+                  {formatDate(displayData.scheduledAt)} • {formatTime(displayData.scheduledAt)} • {formatDuration(displayData.durationInSeconds)} min
                 </p>
               </div>
-              <button className="flex items-center justify-center gap-2 px-3 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition">
+              <a 
+                href={displayData.audioRecordingUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-3 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition"
+              >
                 <PlayCircleIcon className="w-6 h-6" />
                 Play
-              </button>
+              </a>
             </div>
-          ))}
+          ) : displayData.recordings.length > 0 ? ( // Fallback to multiple recordings if array is present
+             displayData.recordings.map((rec, i) => ( // Using 'rec' from dummy data structure
+                <div
+                    key={rec.id || i} // Use id if available, fallback to index
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-100 p-4 rounded-lg"
+                >
+                    <div className="mb-2 sm:mb-0">
+                        <h4 className="text-gray-800 font-medium">{rec.title || 'Recording'}</h4>
+                        <p className="text-gray-500 text-sm">
+                            {rec.date || 'N/A'} • {rec.time || 'N/A'} • {rec.duration || 'N/A'} min
+                        </p>
+                    </div>
+                    <a
+                        href={rec.url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition"
+                    >
+                        <PlayCircleIcon className="w-6 h-6" />
+                        Play
+                    </a>
+                </div>
+            ))
+          ) : (
+            <p className="text-gray-700">No recordings available for this call.</p>
+          )}
         </div>
       </section>
 
-      {/*   Transcript Section */}
+      {/* Transcript Section */}
       <section className="mb-10">
-        <h3 className="text-gray-700 font-medium mb-2">Call Transcript (Latest Call)</h3>
+        <h3 className="text-gray-700 font-medium mb-2">Call Transcript</h3>
         <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 text-gray-700 text-sm leading-relaxed max-h-[300px] overflow-y-auto">
-          {(callData.transcript || []).map((line, i) => (
-            <p key={i} className="mb-2">
-              <span className="font-medium text-gray-900">{line.time}:</span> {line.text}
-            </p>
-          ))}
+          {displayData.transcript.length > 0 ? (
+            displayData.transcript.map((line, i) => (
+              <p key={i} className="mb-2">
+                <span className="font-medium text-gray-900">
+                  {/* Assuming transcript lines have 'role' and 'message' (from backend response) */}
+                  {line.role === 'assistant' ? 'AI' : 'User'}:
+                </span>{" "}
+                {line.message}
+              </p>
+            ))
+          ) : (
+            <p>No transcript available for this call.</p>
+          )}
         </div>
       </section>
 
-      {/*   Back Button */}
+      {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 px-4 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition"

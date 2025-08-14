@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { scheduleHealthCallRequest } from "../../../redux/callSlice";
+import { scheduleHealthCallRequest, fetchScheduledCallsRequest } from "../../../redux/callSlice";
 import { toast } from "react-toastify";
-import React from "react";
+import React, { useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,7 +9,7 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement,
+    LineElement,
   Title,
   Tooltip,
   Legend,
@@ -29,16 +29,53 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export default function Dashboard() {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { scheduledCalls, loading: callsLoading, error: callsError } = useSelector(
+    (state) => state.call
+  );
 
-  // Emojis top-to-bottom (Happy → Overwhelmed)
+  useEffect(() => {
+    if (user?._id) {
+      dispatch(fetchScheduledCallsRequest({ userId: user._id }));
+    }
+  }, [dispatch, user]);
+
+  const findNextScheduledCall = () => {
+    const allCallsArray = Object.values(scheduledCalls || {});
+    const pendingCalls = allCallsArray.filter(call => call.status === 'pending');
+
+    if (pendingCalls.length === 0) {
+      return null;
+    }
+
+    pendingCalls.sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
+
+    const nextCall = pendingCalls[0];
+
+    const scheduledDate = new Date(nextCall.scheduledAt).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    const scheduledTime = new Date(nextCall.scheduledAt).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+
+    return {
+      recipientName: nextCall.recipientName,
+      date: scheduledDate,
+      time: scheduledTime,
+    };
+  };
+
+  const nextScheduledCall = findNextScheduledCall();
+
   const moodEmojis = ["😀︎", "😐︎", "😢︎", "😟︎", "😫︎"];
 
-  // Dummy data for the mood chart
-  // You can replace this with real data from your backend.
-  // The y-axis values correspond to the moodEmojis array index (e.g., 1 = 😀︎, 5 = 😫︎).
   const data = {
     labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     datasets: [
@@ -70,7 +107,7 @@ export default function Dashboard() {
       y: {
         min: 1,
         max: 5,
-        reverse: true, // Happy sabse upar
+        reverse: true,
         ticks: {
           padding: 10,
           stepSize: 1,
@@ -92,28 +129,19 @@ export default function Dashboard() {
 
   const handleSelfCall = () => {
     if (!user?._id) {
-      alert("User ID not found! Please login again.");
+      toast.error("User ID not found! Please login again. ❌");
       return;
     }
-try{
-dispatch(
+    dispatch(
       scheduleHealthCallRequest({
-        scheduledTo: user._id, // ✅ apna khud ka ID
-        scheduledAt: new Date().toISOString(), // ✅ abhi ka time
+        scheduledTo: user._id,
+        scheduledAt: new Date().toISOString(),
       })
-    )
-     toast.success("Call scheduled successfully! 📞");
-  }
- 
-catch (error) {
-      toast.error(error?.message || "Failed to schedule call ❌");
-    }
-  }
-    
+    );
+  };
 
   return (
     <div className="bg-white min-h-screen sm:px-8 lg:px-12 space-y-12 pb-12">
-      
       {/* Welcome Section */}
       <div className="space-y-3">
         <h1 className="text-2xl sm:text-3xl font-bold">
@@ -123,11 +151,20 @@ catch (error) {
           <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
           <span>
             Next Scheduled Call:{" "}
-            <span className="text-[#3fbf81] font-semibold">
-              Not any call scheduled
-            </span>
+            {callsLoading ? (
+              <span className="text-gray-500 font-semibold">Loading...</span>
+            ) : nextScheduledCall ? (
+              <span className="text-[#3fbf81] font-semibold">
+                {nextScheduledCall.recipientName === user?.name ? "Your call" : `${nextScheduledCall.recipientName}'s call`} on {nextScheduledCall.date} at {nextScheduledCall.time}
+              </span>
+            ) : (
+              <span className="text-[#3fbf81] font-semibold">
+                Not any call scheduled
+              </span>
+            )}
           </span>
         </p>
+        {callsError && <p className="text-red-500 text-sm">Error loading calls: {callsError}</p>}
       </div>
 
       {/* Buttons Section */}

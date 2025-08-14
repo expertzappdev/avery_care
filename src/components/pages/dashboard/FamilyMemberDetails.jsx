@@ -1,39 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import CallHistoryTable from "./CallHistoryTable";
+import CallHistoryTable from "./CallHistoryTable"; // Path adjust kar lena
 import { useDispatch, useSelector } from "react-redux";
 import {
   updateFamilyMemberRequest,
   setSelectedFamilyMember,
   fetchFamilyMembersRequest,
-} from "../../../redux/familySlice";
+} from "../../../redux/familySlice"; // Path adjust kar lena
+import { fetchScheduledCallsRequest } from "../../../redux/callSlice.js"; // Call slice import karein
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 export default function FamilyMemberDetails() {
-  const { id } = useParams();
+  const { id } = useParams(); // Family Member ki ID from URL
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { selectedFamilyMember, familyMembers, loading, error } = useSelector((state) => state.family);
+
+  const { selectedFamilyMember, familyMembers, loading, error } = useSelector(
+    (state) => state.family
+  );
+  // Redux se saari calls, loading, error states lein
+  const { scheduledCalls, loading: callsLoading, error: callsError } = useSelector(
+    (state) => state.call
+  );
+  const loggedInUserId = useSelector((state) => state.auth.user._id); // Logged-in user ki ID
 
   const [isEditing, setIsEditing] = useState(false);
 
   const member =
     selectedFamilyMember ||
-    familyMembers.find((m) => m._id === id || m.id === id);
+    familyMembers.find((m) => m._id === id || m.id === id); // ID string ya ObjectId ho sakti hai
 
+  // Fetch family members if not already loaded
   useEffect(() => {
     if (!familyMembers.length) {
       dispatch(fetchFamilyMembersRequest());
     }
   }, [dispatch, familyMembers.length]);
 
+  // Set selectedFamilyMember in Redux
   useEffect(() => {
     if (!selectedFamilyMember && member) {
       dispatch(setSelectedFamilyMember(member));
     }
   }, [dispatch, selectedFamilyMember, member]);
+
+  // Fetch calls specific to this family member
+  useEffect(() => {
+    if (loggedInUserId) { // Ensure logged-in user ID is available
+      // Fetch ALL calls relevant to the logged-in user from Redux store
+      // This is the same action used on ScheduleHealthCall and CallHistory pages
+      dispatch(fetchScheduledCallsRequest({ userId: loggedInUserId }));
+    }
+  }, [dispatch, loggedInUserId]); // Dependency on loggedInUserId
 
   const [editData, setEditData] = useState({
     name: member?.name || "",
@@ -42,6 +62,7 @@ export default function FamilyMemberDetails() {
     phone: member?.phone?.replace(/^\+91/, "") || "",
   });
 
+  // Update editData when member object changes
   useEffect(() => {
     if (member) {
       setEditData({
@@ -67,19 +88,19 @@ export default function FamilyMemberDetails() {
         updatedData: {
           name: editData.name,
           email: editData.email,
-          phoneNumber: editData.phone,
+          phoneNumber: editData.phone, // Ensure your backend expects 'phoneNumber' or 'phone'
           relationship: editData.relationship,
         },
       })
     );
 
-    setTimeout(() => {
-      dispatch(fetchFamilyMembersRequest());
-    }, 500);
+    // Timeout remove kiya gaya hai, saga update ke baad auto-refresh karega list
+    // dispatch(fetchFamilyMembersRequest()); // Saga should handle this implicitly
 
     setIsEditing(false);
   };
 
+  // Update selectedFamilyMember in Redux when familyMembers list updates (after save)
   useEffect(() => {
     const updatedMember = familyMembers.find((m) => m._id === id || m.id === id);
     if (updatedMember) {
@@ -87,11 +108,23 @@ export default function FamilyMemberDetails() {
     }
   }, [familyMembers, id, dispatch]);
 
-  const memberCalls = [
-    { date: "July 15, 2024", time: "10:00 AM", topics: "Follow-up Check, Sleep Issues" },
-    { date: "July 1, 2024", time: "9:30 AM", topics: "Diet Plan, Hydration" },
-    { date: "June 20, 2024", time: "6:00 PM", topics: "Routine Health Check" },
-  ];
+
+  // --- Filtering Calls for this Specific Family Member ---
+  const allFetchedCallsArray = Object.values(scheduledCalls || {}); // All calls the logged-in user can see
+
+  const callsForThisMember = allFetchedCallsArray.filter(call => {
+    // Check if the current family member is either the scheduler or the recipient of the call
+    // Make sure to compare IDs as strings as one might be ObjectId and other string
+    return (
+      call.scheduledBy === id || // If this family member scheduled the call
+      call.scheduledTo === id     // If this family member is the recipient of the call
+    );
+  });
+
+  // Decide what status calls to show (e.g., only completed calls for history)
+  const displayedCallsForMember = callsForThisMember.filter(call => call.status === 'completed');
+  // --- END Filtering Calls ---
+
 
   if (!member) {
     return (
@@ -211,7 +244,19 @@ export default function FamilyMemberDetails() {
 
       <div className="mt-6 p-5 rounded-xl">
         <h2 className="text-lg font-semibold mb-4 text-gray-800">Call History</h2>
-        <CallHistoryTable calls={memberCalls} />
+        {/* Pass filtered calls to CallHistoryTable */}
+        {callsLoading && displayedCallsForMember.length === 0 ? (
+          <p className="text-gray-500">Loading call history for {member?.name}...</p>
+        ) : callsError ? (
+          <p className="text-red-500">Error loading calls: {callsError}</p>
+        ) : (
+          <CallHistoryTable calls={displayedCallsForMember} />
+        )}
+        {!callsLoading && !callsError && displayedCallsForMember.length === 0 && (
+          <p className="text-gray-500 italic mt-4">
+            No completed calls found for {member?.name}.
+          </p>
+        )}
       </div>
 
       <button
