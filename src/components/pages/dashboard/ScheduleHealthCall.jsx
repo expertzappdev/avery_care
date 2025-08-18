@@ -167,7 +167,7 @@ export default function ScheduleHealthCall() {
   };
 
   return (
-    <div className="flex flex-col px-5 sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
+    <div className="flex flex-col sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
       {/* Page Title */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -236,11 +236,11 @@ export default function ScheduleHealthCall() {
         <div className="flex justify-center mt-6">
           <button
             onClick={handleSchedule}
-            className="flex items-center gap-2 px-8 py-3 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105"
+            className="flex items-center gap-2 sm:px-8 sm:py-3 max-sm:px-4 max-sm:py-2 bg-[#3fbf81] text-white font-semibold rounded-full hover:bg-[#36a973] transition transform hover:scale-105"
             disabled={loading}
           >
             <PhoneArrowUpRightIcon className="w-5 h-5" />
-            {loading ? "Scheduling..." : "Schedule Health Call"}
+            {loading ? "Scheduling..." : "Schedule Call"}
           </button>
         </div>
       </div>

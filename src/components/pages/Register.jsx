@@ -28,12 +28,12 @@ export default function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handlePhoneChange = (value, country) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      phoneNumber: value, // Example: '919876543210'
-    }));
-  };
+ const handlePhoneChange = (value, country) => {
+  setFormData((prevData) => ({
+    ...prevData,
+    phoneNumber: `+${value}`, // ✅ Force plus sign
+  }));
+};
 
   const handlePhoneKeyDown = (e) => {
     const input = e.target;
@@ -46,23 +46,15 @@ export default function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 🧠 Remove country code (91) if present
-    const plainPhoneNumber =
-      formData.phoneNumber.startsWith("91")
-        ? formData.phoneNumber.slice(2)
-        : formData.phoneNumber;
-
-    const cleanData = {
-      ...formData,
-      phoneNumber: plainPhoneNumber,
-    };
-
-    dispatch(signupRequest(cleanData));
+    // ✅ Send phone number with country code directly
+    dispatch(signupRequest(formData));
   };
 
   useEffect(() => {
     if (successMessage && email) {
-      navigate("/verify-otp", { state: { email: formData.email, phone: formData.phoneNumber } });
+      navigate("/verify-otp", {
+        state: { email: formData.email, phone: formData.phoneNumber },
+      });
       dispatch(clearSuccessMessage());
     }
   }, [successMessage, email, navigate, dispatch]);
@@ -86,7 +78,10 @@ export default function Signup() {
 
       <form className="w-full max-w-md space-y-5" onSubmit={handleSubmit}>
         <div className="w-full">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Full Name
           </label>
           <input
@@ -103,7 +98,10 @@ export default function Signup() {
         </div>
 
         <div className="w-full">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Email Address
           </label>
           <input
@@ -120,7 +118,10 @@ export default function Signup() {
         </div>
 
         <div className="w-full">
-          <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="phoneNumber"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Phone Number
           </label>
           <PhoneInput
@@ -151,7 +152,10 @@ export default function Signup() {
         </div>
 
         <div className="w-full">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             Password
           </label>
           <input
@@ -179,7 +183,10 @@ export default function Signup() {
 
       <div className="mt-6 text-center text-sm text-gray-700">
         Already have an account?{" "}
-        <Link to="/login" className="font-semibold text-[#3fbf81] hover:underline">
+        <Link
+          to="/login"
+          className="font-semibold text-[#3fbf81] hover:underline"
+        >
           Login
         </Link>
       </div>

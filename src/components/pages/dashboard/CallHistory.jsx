@@ -90,7 +90,7 @@ export default function CallHistory() {
 
         <input
           type="text"
-          placeholder="Filter by Date (e.g. August 13)"
+          placeholder="Filter by Date (e.g. May)"
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
           className="w-55 px-4 py-2 rounded-md bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-green-300 transition"

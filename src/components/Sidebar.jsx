@@ -18,10 +18,8 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="min-h-screen bg-white border-r border-gray-200 flex flex-col w-16 md:w-72 transition-all duration-300 pt-8">
-      {/*   Sidebar Navbar ke neeche start hota hai */}
-
-      {/*   Navigation */}
+    // Mobile (<768px) me bilkul hide, md aur upar me show
+    <aside className="hidden md:flex min-h-screen bg-white border-r border-gray-200 flex-col w-12 md:w-72 transition-all duration-300 pt-8">
       <nav className="flex flex-col gap-2 mt-0 md:mt-4">
         {navItems.map((item) => (
           <NavLink
@@ -36,9 +34,7 @@ export default function Sidebar() {
                }`
             }
           >
-            {/*   Icon */}
             <item.icon className="h-5 w-5 mx-auto md:mx-0" />
-            {/*   Text (sirf desktop pe show hoga) */}
             <span className="hidden md:inline">{item.name}</span>
           </NavLink>
         ))}

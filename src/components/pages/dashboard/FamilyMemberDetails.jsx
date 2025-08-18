@@ -41,7 +41,7 @@ export default function FamilyMemberDetails() {
 
   // Set selectedFamilyMember in Redux
   useEffect(() => {
-    if (!selectedFamilyMember && member) {
+    if (member && (!selectedFamilyMember || selectedFamilyMember._id !== member._id)) {
       dispatch(setSelectedFamilyMember(member));
     }
   }, [dispatch, selectedFamilyMember, member]);
@@ -49,8 +49,6 @@ export default function FamilyMemberDetails() {
   // Fetch calls specific to this family member
   useEffect(() => {
     if (loggedInUserId) { // Ensure logged-in user ID is available
-      // Fetch ALL calls relevant to the logged-in user from Redux store
-      // This is the same action used on ScheduleHealthCall and CallHistory pages
       dispatch(fetchScheduledCallsRequest({ userId: loggedInUserId }));
     }
   }, [dispatch, loggedInUserId]); // Dependency on loggedInUserId
@@ -58,7 +56,7 @@ export default function FamilyMemberDetails() {
   const [editData, setEditData] = useState({
     name: member?.name || "",
     relationship: member?.relationship || "",
-    email: member?.email || "sarah.johnson@email.com",
+    email: member?.email || "", // Default email removed, better to be empty or handle on backend
     phone: member?.phone?.replace(/^\+91/, "") || "",
   });
 
@@ -68,14 +66,11 @@ export default function FamilyMemberDetails() {
       setEditData({
         name: member.name || "",
         relationship: member.relationship || "",
-        email: member.email || "sarah.johnson@email.com",
+        email: member.email || "", // Default email removed
         phone: member.phone?.replace(/^\+91/, "") || "",
       });
     }
   }, [member]);
-
-  const profileImage =
-    "https://images.unsplash.com/photo-1527980965255-d3b416303d12?crop=faces&fit=crop&w=300&h=300";
 
   const handleChange = (e) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
@@ -88,25 +83,23 @@ export default function FamilyMemberDetails() {
         updatedData: {
           name: editData.name,
           email: editData.email,
-          phoneNumber: editData.phone, // Ensure your backend expects 'phoneNumber' or 'phone'
+          phoneNumber: `+91${editData.phone}`, // Ensure to send with +91 prefix
           relationship: editData.relationship,
         },
       })
     );
-
-    // Timeout remove kiya gaya hai, saga update ke baad auto-refresh karega list
-    // dispatch(fetchFamilyMembersRequest()); // Saga should handle this implicitly
-
     setIsEditing(false);
   };
 
   // Update selectedFamilyMember in Redux when familyMembers list updates (after save)
+  // This useEffect ensures the local 'member' variable and selectedFamilyMember in Redux
+  // are in sync with the latest data from familyMembers array, which is updated by saga.
   useEffect(() => {
     const updatedMember = familyMembers.find((m) => m._id === id || m.id === id);
-    if (updatedMember) {
+    if (updatedMember && (!selectedFamilyMember || updatedMember._id !== selectedFamilyMember._id)) {
       dispatch(setSelectedFamilyMember(updatedMember));
     }
-  }, [familyMembers, id, dispatch]);
+  }, [familyMembers, id, dispatch, selectedFamilyMember]);
 
 
   // --- Filtering Calls for this Specific Family Member ---
@@ -116,8 +109,8 @@ export default function FamilyMemberDetails() {
     // Check if the current family member is either the scheduler or the recipient of the call
     // Make sure to compare IDs as strings as one might be ObjectId and other string
     return (
-      call.scheduledBy === id || // If this family member scheduled the call
-      call.scheduledTo === id     // If this family member is the recipient of the call
+      String(call.scheduledBy) === String(id) || // If this family member scheduled the call
+      String(call.scheduledTo) === String(id)     // If this family member is the recipient of the call
     );
   });
 
@@ -125,8 +118,37 @@ export default function FamilyMemberDetails() {
   const displayedCallsForMember = callsForThisMember.filter(call => call.status === 'completed');
   // --- END Filtering Calls ---
 
+  // Function to generate avatar
+  const getAvatar = (name) => {
+    const firstLetter = name ? name.charAt(0).toUpperCase() : '';
+    return (
+      <div
+        className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl sm:text-4xl"
+        style={{ backgroundColor: '#3fbf81' }} // Your theme color
+      >
+        {firstLetter}
+      </div>
+    );
+  };
 
-  if (!member) {
+
+  if (!member && !loading) {
+    // If no member is found after loading, it means the ID might be invalid
+    return (
+      <div className="p-5">
+        <p className="text-red-500">Family member not found.</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+          Back to Family Members
+        </button>
+      </div>
+    );
+  }
+
+  if (loading || !member) {
     return (
       <div className="p-5">
         <p className="text-gray-500">Loading member details...</p>
@@ -134,23 +156,22 @@ export default function FamilyMemberDetails() {
     );
   }
 
+
   return (
     <div className="sm:ml-8 md:ml-0 min-h-screen bg-white">
-      <p className="text-xs sm:text-sm text-gray-500 mb-4">
+      {/* <p className="text-xs sm:text-sm text-gray-500 mb-4">
         Family Members / <span className="text-gray-700 font-medium">{member?.name}</span>
-      </p>
+      </p> */}
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-xl">
         <div className="flex items-center gap-4">
-          <img
-            src={profileImage}
-            alt={member?.name}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
-          />
+          {getAvatar(member?.name)} {/* Using the dynamic avatar function */}
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">{editData.name}</h1>
             <p className="text-gray-600 text-sm sm:text-base">{editData.relationship}</p>
-            <p className="text-gray-600 text-sm sm:text-base">{editData.email} · +91{editData.phone}</p>
+            <p className="text-gray-600 text-sm sm:text-base">
+              {editData.email}{editData.email && editData.phone ? ' · ' : ''}{editData.phone ? `+91${editData.phone}` : ''}
+            </p>
           </div>
         </div>
 
@@ -261,10 +282,10 @@ export default function FamilyMemberDetails() {
 
       <button
         onClick={() => navigate(-1)}
-        className="mt-6 flex items-center justify-center gap-2 px-4 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition w-full sm:w-auto"
+        className="mt-6 flex items-center justify-center gap-2 px-4 py-2 bg-[#3fbf81] text-white rounded-full hover:bg-[#36a973] transition sm:w-auto"
       >
         <ArrowLeftIcon className="w-5 h-5" />
-        Back to Family Members
+        Back
       </button>
     </div>
   );

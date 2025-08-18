@@ -99,7 +99,7 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
 
 
   return (
-    <div className="min-h-screen bg-white px-6 sm:px-10">
+    <div className="min-h-screen bg-white sm:px-8">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Settings</h2>
 
       {/* Profile Section */}
@@ -110,7 +110,7 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
           className="w-full flex items-center gap-3 py-3 text-gray-900 font-semibold text-lg"
         >
           <User className="w-5 h-5 text-gray-700" />
-          Profile & Personal Info
+          Personal Info
           {openSection === "profile" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 
@@ -144,7 +144,7 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
           className="w-full flex items-center gap-3 py-3 text-gray-900 font-semibold text-lg"
         >
           <Phone className="w-5 h-5 text-gray-700" />
-          Change Phone Number
+          Change Number
           {openSection === "phone" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
         </button>
 

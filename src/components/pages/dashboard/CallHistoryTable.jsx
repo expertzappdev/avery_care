@@ -1,43 +1,40 @@
-// src/components/CallHistoryTable.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function CallHistoryTable({ calls }) {
   const navigate = useNavigate();
 
-  // Helper function to format date for display
+  // Format date
   const formatDate = (dateStr) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return "N/A";
     try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString("en-GB"); // E.g., 13/08/2025
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-GB");
     } catch (e) {
-        console.error("Invalid date string for formatDate:", dateStr, e);
-        return 'Invalid Date';
+      console.error("Invalid date string for formatDate:", dateStr, e);
+      return "Invalid Date";
     }
   };
 
-  // Helper function to format time for display
+  // Format time
   const formatTime = (dateStr) => {
-    if (!dateStr) return 'N/A';
+    if (!dateStr) return "N/A";
     try {
-        const date = new Date(dateStr);
-        return date.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false, // Use 24-hour format
-        }); // E.g., 14:03
+      const date = new Date(dateStr);
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
     } catch (e) {
-        console.error("Invalid date string for formatTime:", dateStr, e);
-        return 'Invalid Time';
+      console.error("Invalid date string for formatTime:", dateStr, e);
+      return "Invalid Time";
     }
   };
 
-  // Helper to get AI Summary from call object's aiSummary property
-  // Ab aiSummary saga mein hi ban raha hai, toh yahan direct use karenge.
-  // Agar saga ne null ya undefined set kiya hai, toh 'No summary available' dikhega.
+  // AI Summary display
   const displayAiSummary = (aiSummaryValue) => {
-    return aiSummaryValue || 'No summary available';
+    return aiSummaryValue || "No summary available";
   };
 
   return (
@@ -46,9 +43,13 @@ export default function CallHistoryTable({ calls }) {
         {/* Table Head */}
         <thead>
           <tr className="bg-gray-100 text-left text-gray-700">
-            <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
-            <th className="py-3 px-4 font-medium text-sm sm:text-base">Time</th>
-            <th className="py-3 px-4 font-medium text-sm sm:text-base">Key Topics</th>
+            {/* Name visible on all screens */}
+            <th className="py-3 px-4 font-medium text-sm sm:text-base">Name</th>
+            {/* Date visible only on sm+ screens, hidden on smaller screens */}
+            <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Date</th>
+            {/* Time and Key Topics visible only on sm+ screens */}
+            <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Time</th>
+            <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Key Topics</th>
             <th className="py-3 px-4 font-medium text-sm sm:text-base"></th>
           </tr>
         </thead>
@@ -58,16 +59,31 @@ export default function CallHistoryTable({ calls }) {
           {calls && calls.length > 0 ? (
             calls.map((call) => (
               <tr
-                key={call._id} // Use call._id as key for unique identification
+                key={call._id}
                 className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition"
               >
-                <td className="py-3 px-4 text-sm sm:text-base">{formatDate(call.scheduledAt)}</td>
-                <td className="py-3 px-4 text-sm sm:text-base">{formatTime(call.scheduledAt)}</td>
-                {/* Yahan par changes hain: call.aiSummary ko use kiya hai */}
-                <td className="py-3 px-4 text-sm sm:text-base">{displayAiSummary(call.aiSummary)}</td>
+                {/* Recipient Name */}
+                <td className="py-3 px-4 text-sm sm:text-base">
+                  {call.recipientName || "N/A"}
+                </td>
+
+                {/* Date - Hidden on small screens, visible on sm+ */}
+                <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                  {formatDate(call.scheduledAt)}
+                </td>
+
+                {/* Time & Key Topics only on larger screens */}
+                <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                  {formatTime(call.scheduledAt)}
+                </td>
+                <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                  {displayAiSummary(call.aiSummary)}
+                </td>
+
+                {/* View Details */}
                 <td
-                  className="py-3 px-4 text-[#3fbf81] font-medium cursor-pointer hover:underline text-sm sm:text-base"
-                  onClick={() => navigate("/call-details", { state: { callData: call } })} // Pass full call object for details
+                  className="py-3 px-4 text-[#3fbf81] font-medium cursor-pointer hover:underline text-xs sm:text-sm whitespace-nowrap"
+                  onClick={() => navigate("/call-details", { state: { callData: call } })}
                 >
                   View Details
                 </td>
@@ -76,10 +92,10 @@ export default function CallHistoryTable({ calls }) {
           ) : (
             <tr>
               <td
-                colSpan="4"
+                colSpan="5" // Changed colspan to 5 due to the new 'Name' column
                 className="text-center py-6 text-gray-500 italic text-sm sm:text-base"
               >
-                No calls found for the selected filter.
+                No calls found for the selected user.
               </td>
             </tr>
           )}

@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-// import { toast } from 'react-toastify'; // ❌ Removed toast import
-
 import {
   fetchFamilyMembersRequest,
   addFamilyMemberRequest,
   deleteFamilyMemberRequest,
-  // clearMessages, // ❌ Removed clearMessages import - THIS IS THE KEY LINE
 } from "../../../redux/familySlice";
 import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 export default function FamilyMembers() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-  const { familyMembers: familyList, loading, error } = useSelector(
+  const { familyMembers: familyList, loading } = useSelector(
     (state) => state.family
   );
 
@@ -26,7 +21,7 @@ export default function FamilyMembers() {
     name: "",
     relationship: "",
     email: "",
-    phoneNumber: "",
+    phoneNumber: "+91", // ✅ Default value so input never breaks
   });
 
   useEffect(() => {
@@ -44,19 +39,24 @@ export default function FamilyMembers() {
       !formData.email ||
       !formData.phoneNumber
     ) {
-      alert("Please fill in ALL required fields (Name, Relationship, Email, Phone Number).");
+      alert(
+        "Please fill in ALL required fields (Name, Relationship, Email, Phone Number)."
+      );
       return;
     }
 
     dispatch(addFamilyMemberRequest(formData));
-    setFormData({ name: "", relationship: "", email: "", phoneNumber: "" });
+    // ✅ Reset but keep +91
+    setFormData({
+      name: "",
+      relationship: "",
+      email: "",
+      phoneNumber: "+91",
+    });
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this family member?"
-    );
-    if (confirmDelete) {
+    if (window.confirm("Are you sure you want to delete this family member?")) {
       dispatch(deleteFamilyMemberRequest(id));
     }
   };
@@ -66,7 +66,7 @@ export default function FamilyMembers() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row px-5 sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
+    <div className="flex flex-col md:flex-row sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
       <div className="flex-1 rounded-xl space-y-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
           Add Family Member
@@ -81,7 +81,12 @@ export default function FamilyMembers() {
               type: "text",
               placeholder: "Enter relationship",
             },
-            { label: "Email", name: "email", type: "email", placeholder: "Enter email" },
+            {
+              label: "Email",
+              name: "email",
+              type: "email",
+              placeholder: "Enter email",
+            },
           ].map((field, idx) => (
             <div key={idx}>
               <label className="block font-medium mb-2 text-gray-700">
@@ -99,35 +104,35 @@ export default function FamilyMembers() {
           ))}
 
           <div>
-  <label className="block font-medium mb-2 text-gray-700">Phone Number</label>
-  <PhoneInput
-    country={"in"}
-    onlyCountries={["in"]}
-    countryCodeEditable={false}
-    disableDropdown={true} // 🔒 Lock flag dropdown
-    value={`91${formData.phoneNumber}`} // internally uses full
-    onChange={(value) => {
-      // Remove +91 if present
-      const cleaned = value.replace(/^91/, "");
-      if (/^\d{0,10}$/.test(cleaned)) {
-        setFormData({ ...formData, phoneNumber: cleaned });
-      }
-    }}
-    inputStyle={{
-      width: "93.5%",
-      marginLeft:'30px',
-      borderRadius: "0.375rem",
-      padding: "0.5rem 1rem",
-      height:' 42px',
-      border: "1px solid #d1d5db",
-    }}
-    containerStyle={{
-      width: "100%",
-    }}
-  />
-</div>
-
-
+            <label className="block font-medium mb-2 text-gray-700">
+              Phone Number
+            </label>
+            <PhoneInput
+              country={"in"}
+              onlyCountries={["in"]}
+              countryCodeEditable={false}
+              disableDropdown={true}
+              value={formData.phoneNumber}
+              onChange={(value) => {
+                // ✅ Always keep the + at start
+                if (!value.startsWith("+")) {
+                  value = "+" + value;
+                }
+                setFormData({ ...formData, phoneNumber: value });
+              }}
+              inputStyle={{
+                width: "90%",
+                marginLeft: "30px",
+                borderRadius: "0.375rem",
+                padding: "0.5rem 1rem",
+                height: "42px",
+                border: "1px solid #d1d5db",
+              }}
+              containerStyle={{
+                width: "100%",
+              }}
+            />
+          </div>
 
           <div className="flex justify-center mt-6">
             <button
@@ -189,40 +194,41 @@ export default function FamilyMembers() {
           </p>
         ) : (
           <div className="divide-y divide-gray-200">
-            {Array.isArray(familyList) && familyList.map((member) => (
-              <div
-                key={member._id}
-                className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
-              >
-                <div>
-                  <p className="font-medium text-lg text-gray-900">
-                    {member.name}
-                  </p>
-                  <p className="text-sm text-gray-500">{member.relationship}</p>
+            {Array.isArray(familyList) &&
+              familyList.map((member) => (
+                <div
+                  key={member._id}
+                  className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
+                >
+                  <div>
+                    <p className="font-medium text-lg text-gray-900">
+                      {member.name}
+                    </p>
+                    <p className="text-sm text-gray-500">{member.relationship}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleDelete(member._id)}
+                      disabled={loading}
+                      className={`text-red-500 hover:text-red-700 transition ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                      title="Delete"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDetails(member)}
+                      disabled={loading}
+                      className={`px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition ${
+                        loading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      Details
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleDelete(member._id)}
-                    disabled={loading}
-                    className={`text-red-500 hover:text-red-700 transition ${
-                      loading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    title="Delete"
-                  >
-                    <TrashIcon className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDetails(member)}
-                    disabled={loading}
-                    className={`px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition ${
-                      loading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    Details
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
