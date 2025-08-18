@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PhoneInput from "react-phone-input-2";
-import 'react-phone-input-2/lib/style.css';
-import { useEffect } from "react";
+import "react-phone-input-2/lib/style.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFamilyMembersRequest } from "../../../redux/familySlice";
+import { fetchScheduledCallsRequest } from "../../../redux/callSlice";
 import {
   User,
   Phone,
@@ -14,16 +14,55 @@ import {
   ChevronUp,
   Mail,
 } from "lucide-react";
+import CallHistoryTable from "../dashboard/CallHistoryTable"; //  Path adjust kar lena
 
 const SettingsPage = () => {
   const [openSection, setOpenSection] = useState(null);
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { familyMembers } = useSelector((state) => state.family);
+  const { scheduledCalls, loading: callsLoading, error: callsError } = useSelector(
+    (state) => state.call
+  );
+
+  const familyCount = familyMembers?.length || 0;
+
+  useEffect(() => {
+    dispatch(fetchFamilyMembersRequest());
+    if (user?._id) {
+      dispatch(fetchScheduledCallsRequest({ userId: user._id }));
+    }
+  }, [dispatch, user?._id]);
+
+  // --- Calls Filtering for Logged-in User ---
+  const allFetchedCallsArray = Object.values(scheduledCalls || {});
+  const callsForUser = allFetchedCallsArray.filter(
+    (call) =>
+      String(call.scheduledBy) === String(user?._id) ||
+      String(call.scheduledTo) === String(user?._id)
+  );
+  const displayedCallsForUser = callsForUser.filter(
+    (call) => call.status === "completed"
+  );
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
   };
 
-  // Change Phone Number state
+  // --- Avatar Generator ---
+  const getAvatar = (name) => {
+    const firstLetter = name ? name.charAt(0).toUpperCase() : "";
+    return (
+      <div
+        className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl sm:text-4xl"
+        style={{ backgroundColor: "#3fbf81" }}
+      >
+        {firstLetter}
+      </div>
+    );
+  };
+
+  // ---------------- States for Phone + Password ----------------
   const [phoneData, setPhoneData] = useState({
     oldPhone: user?.phoneNumber || "",
     newPhone: "",
@@ -40,21 +79,16 @@ const SettingsPage = () => {
   const handlePhoneKeyDown = (e) => {
     const input = e.target;
     const caretPosition = input.selectionStart;
-
     if ((e.key === "Backspace" || e.key === "Delete") && caretPosition <= 3) {
       e.preventDefault();
     }
   };
 
   const updatePhone = () => {
-    // Replaced alert with a message box for a non-blocking UI
-    const message = `Phone updated to: ${phoneData.newPhone}`;
-    // In a real app, you would dispatch a Redux action here.
-    alert(message);
+    alert(`Phone updated to: ${phoneData.newPhone}`);
     setPhoneData({ ...phoneData, newPhone: "", password: "" });
   };
 
-  // Change Password state
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -71,38 +105,26 @@ const SettingsPage = () => {
       alert("New passwords do not match!");
       return;
     }
-    // Replaced alert with a message box for a non-blocking UI
-    // In a real app, you would dispatch a Redux action here.
     alert("Password updated successfully!");
     setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
   };
 
   const deleteAccount = () => {
-    // Replaced window.confirm with a message box for a non-blocking UI
     const confirmDelete = window.confirm(
       "Are you sure you want to permanently delete your account? This action cannot be undone."
     );
     if (confirmDelete) {
-      // In a real app, you would dispatch a Redux action to delete the account.
       alert("Your account has been deleted.");
     }
   };
 
-  const dispatch = useDispatch();
-
-useEffect(() => {
-  dispatch(fetchFamilyMembersRequest());
-}, [dispatch]);
-
-const familyMembers = useSelector((state) => state.family.familyMembers);
-  const familyCount = familyMembers?.length || 0;
-
-
   return (
     <div className="min-h-screen bg-white sm:px-8">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Settings</h2>
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+        Settings
+      </h2>
 
-      {/* Profile Section */}
+      {/* -------- Profile Section (FamilyMemberDetails style) -------- */}
       <div>
         <button
           type="button"
@@ -111,32 +133,81 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         >
           <User className="w-5 h-5 text-gray-700" />
           Personal Info
-          {openSection === "profile" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
+          {openSection === "profile" ? (
+            <ChevronUp className="ml-auto w-5 h-5" />
+          ) : (
+            <ChevronDown className="ml-auto w-5 h-5" />
+          )}
         </button>
 
         {openSection === "profile" && (
-          <div className="pl-6 sm:pl-8 pt-3 text-gray-700 space-y-4">
-            <div className="pb-2 border-b border-gray-100">
-              <p className="text-sm text-gray-500">Full Name</p>
-              <p className="text-base font-semibold text-gray-900">{user?.name || "N/A"}</p>
+          <div className="p-5 rounded-xl bg-white mt-3">
+            <div className="flex items-center gap-4">
+              {getAvatar(user?.name)}
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold">{user?.name}</h1>
+                <p className="text-gray-600">{user?.email}</p>
+                <p className="text-gray-600">{user?.phoneNumber}</p>
+                <p> <span className="text-gray-600">Total Members Linked:</span> {familyCount}</p>
+              </div>
             </div>
-            <div className="pb-2 border-b border-gray-100">
-              <p className="text-sm text-gray-500">Email Address</p>
-              <p className="text-base font-semibold text-gray-900">{user?.email || "N/A"}</p>
+
+            {/* Health Details Dummy (like FamilyMemberDetails) */}
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">
+                Health Details
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: "Conditions", value: "None" },
+                  { label: "Medications", value: "None" },
+                  { label: "Allergies", value: "None" },
+                  { label: "Preferences", value: "Prefers evening calls" },
+                ].map((item, idx) => (
+                  <div key={idx}>
+                    <p className="text-sm font-medium text-gray-600">
+                      {item.label}
+                    </p>
+                    <p className="text-gray-800 font-semibold">{item.value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="pb-2 border-b border-gray-100">
-              <p className="text-sm text-gray-500">Phone Number</p>
-              <p className="text-base font-semibold text-gray-900">{user?.phoneNumber || "N/A"}</p>
+
+            {/* Call History */}
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">
+                Your Call History
+              </h2>
+              {callsLoading && displayedCallsForUser.length === 0 ? (
+                <p className="text-gray-500">
+                  Loading call history for {user?.name}...
+                </p>
+              ) : callsError ? (
+                <p className="text-red-500">Error loading calls: {callsError}</p>
+              ) : (
+                <CallHistoryTable calls={displayedCallsForUser} />
+              )}
+              {!callsLoading &&
+                !callsError &&
+                displayedCallsForUser.length === 0 && (
+                  <p className="text-gray-500 italic mt-4">
+                    No completed calls found for {user?.name}.
+                  </p>
+                )}
             </div>
-            <div>
+
+            {/* <div className="mt-6">
               <p className="text-sm text-gray-500">Family Members Linked</p>
-              <p className="text-base font-semibold text-gray-900">{familyCount}</p>
-            </div>
+              <p className="text-base font-semibold text-gray-900">
+                {familyCount}
+              </p>
+            </div> */}
           </div>
         )}
       </div>
 
-      {/* Change Phone Number */}
+      {/* -------- Change Phone Number -------- */}
       <div className="mt-5">
         <button
           type="button"
@@ -145,7 +216,11 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         >
           <Phone className="w-5 h-5 text-gray-700" />
           Change Number
-          {openSection === "phone" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
+          {openSection === "phone" ? (
+            <ChevronUp className="ml-auto w-5 h-5" />
+          ) : (
+            <ChevronDown className="ml-auto w-5 h-5" />
+          )}
         </button>
 
         {openSection === "phone" && (
@@ -155,7 +230,9 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
             </p>
 
             <div>
-              <label className="block text-sm font-medium mb-1">New Phone Number</label>
+              <label className="block text-sm font-medium mb-1">
+                New Phone Number
+              </label>
               <PhoneInput
                 country={"in"}
                 onlyCountries={["in"]}
@@ -168,12 +245,12 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
                   required: true,
                 }}
                 inputStyle={{
-                  width: '100%',
-                  maxWidth: '250px',
-                  padding: '8px 12px',
-                  marginLeft: '35px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
+                  width: "100%",
+                  maxWidth: "250px",
+                  padding: "8px 12px",
+                  marginLeft: "35px",
+                  borderRadius: "6px",
+                  fontSize: "14px",
                 }}
                 buttonStyle={{
                   borderRadius: "8px 0 0 8px",
@@ -207,7 +284,7 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         )}
       </div>
 
-      {/* Change Password */}
+      {/* -------- Change Password -------- */}
       <div className="mt-5">
         <button
           type="button"
@@ -216,7 +293,11 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         >
           <Lock className="w-5 h-5 text-gray-700" />
           Change Password
-          {openSection === "password" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
+          {openSection === "password" ? (
+            <ChevronUp className="ml-auto w-5 h-5" />
+          ) : (
+            <ChevronDown className="ml-auto w-5 h-5" />
+          )}
         </button>
 
         {openSection === "password" && (
@@ -246,7 +327,9 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
             </div>
 
             <div>
-              <label className="block text-sm font-medium">Confirm New Password</label>
+              <label className="block text-sm font-medium">
+                Confirm New Password
+              </label>
               <input
                 type="password"
                 name="confirmPassword"
@@ -267,7 +350,7 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         )}
       </div>
 
-      {/* Help & Support */}
+      {/* -------- Help & Support -------- */}
       <div className="mt-5">
         <button
           type="button"
@@ -276,14 +359,21 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         >
           <HelpCircle className="w-5 h-5 text-gray-700" />
           Help & Support
-          {openSection === "help" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
+          {openSection === "help" ? (
+            <ChevronUp className="ml-auto w-5 h-5" />
+          ) : (
+            <ChevronDown className="ml-auto w-5 h-5" />
+          )}
         </button>
 
         {openSection === "help" && (
           <div className="pl-6 sm:pl-8 pt-3 space-y-2 text-sm text-gray-700">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-gray-600" />
-              <a href="mailto:support@example.com" className="text-blue-600 underline">
+              <a
+                href="mailto:support@example.com"
+                className="text-blue-600 underline"
+              >
                 Email Support
               </a>
             </div>
@@ -297,7 +387,7 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         )}
       </div>
 
-      {/* Delete Account */}
+      {/* -------- Delete Account -------- */}
       <div className="pt-4">
         <button
           type="button"
@@ -306,13 +396,18 @@ const familyMembers = useSelector((state) => state.family.familyMembers);
         >
           <Trash2 className="w-5 h-5 " />
           Delete Account
-          {openSection === "delete" ? <ChevronUp className="ml-auto w-5 h-5" /> : <ChevronDown className="ml-auto w-5 h-5" />}
+          {openSection === "delete" ? (
+            <ChevronUp className="ml-auto w-5 h-5" />
+          ) : (
+            <ChevronDown className="ml-auto w-5 h-5" />
+          )}
         </button>
 
         {openSection === "delete" && (
           <div className="pl-6 sm:pl-8 pt-3 text-gray-700">
             <p className="text-sm mb-3">
-              Deleter your account will remove all your data permanently. This action cannot be undone.
+              Deleting your account will remove all your data permanently. This
+              action cannot be undone.
             </p>
             <button
               onClick={deleteAccount}

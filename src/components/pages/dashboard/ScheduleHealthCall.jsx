@@ -170,7 +170,7 @@ export default function ScheduleHealthCall() {
     <div className="flex flex-col sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
       {/* Page Title */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
           Schedule Health Call
         </h1>
         <p className="text-gray-600">

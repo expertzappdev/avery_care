@@ -46,11 +46,11 @@ export default function CallHistoryTable({ calls }) {
             {/* Name visible on all screens */}
             <th className="py-3 px-4 font-medium text-sm sm:text-base">Name</th>
             {/* Date visible only on sm+ screens, hidden on smaller screens */}
-            <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Date</th>
+            <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
             {/* Time and Key Topics visible only on sm+ screens */}
             <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Time</th>
             <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Key Topics</th>
-            <th className="py-3 px-4 font-medium text-sm sm:text-base"></th>
+            <th className="py-3 px-4 font-medium text-sm sm:text-base">Actions</th>
           </tr>
         </thead>
 
@@ -68,7 +68,7 @@ export default function CallHistoryTable({ calls }) {
                 </td>
 
                 {/* Date - Hidden on small screens, visible on sm+ */}
-                <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                <td className="py-3 px-4 text-sm sm:text-base">
                   {formatDate(call.scheduledAt)}
                 </td>
 
@@ -95,7 +95,7 @@ export default function CallHistoryTable({ calls }) {
                 colSpan="5" // Changed colspan to 5 due to the new 'Name' column
                 className="text-center py-6 text-gray-500 italic text-sm sm:text-base"
               >
-                No calls found for the selected user.
+                No calls found for the selected filter.
               </td>
             </tr>
           )}

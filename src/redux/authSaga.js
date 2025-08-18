@@ -14,7 +14,7 @@ import { toast } from 'react-toastify';
 
 const API_BASE_URL = 'http://localhost:5000/api/auth';
 
-// ✅ Signup worker
+//  Signup worker
 function* signupWorker(action) {
   try {
     const response = yield call(() =>
@@ -48,7 +48,7 @@ function* loginWorker(action) {
         body: JSON.stringify(action.payload),
       }).then(res => res.json())
     );
-    console.log('Login API response:', response); // <-- Add this line
+    // console.log('Login API response:', response); // <-- Add this line
     if (response.success) {
       yield put(loginSuccess({ user: response }));
       toast.success(response.message || "Login successful. Welcome back!");
