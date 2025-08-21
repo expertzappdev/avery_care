@@ -1,11 +1,11 @@
 // Hero Component
 import React from "react";
 import { Link } from "react-router-dom"; 
-import { useSelector } from "react-redux"; // ✅ auth state lene ke liye
+import { useSelector } from "react-redux"; //  auth state lene ke liye
 import bannerImage from "../../../assets/bannerImageHome.png";
 
 const Hero = () => {
-  // ✅ Redux se auth state (apne slice me jo rakha hai uske hisaab se change kar le)
+  //  Redux se auth state (apne slice me jo rakha hai uske hisaab se change kar le)
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   return (

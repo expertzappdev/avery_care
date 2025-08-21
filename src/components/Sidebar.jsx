@@ -11,7 +11,7 @@ import {
 const navItems = [
   { id: "dashboard", name: "Dashboard", icon: HomeIcon, path: "/dashboard" },
   { id: "schedule", name: "Schedule", icon: CalendarIcon, path: "/schedule" },
-  { id: "history", name: "Call History", icon: ClockIcon, path: "/history" },
+  { id: "history", name: "All Calls", icon: ClockIcon, path: "/history" },
   { id: "family", name: "Family Members", icon: UserGroupIcon, path: "/family-members" },
   { id: "settings", name: "Settings", icon: Cog6ToothIcon, path: "/settings" },
 ];

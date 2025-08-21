@@ -27,7 +27,7 @@ import VerifyOtp from "./components/pages/VerifyOtp";
 function Layout() {
   const location = useLocation();
 
-  // ✅ CORRECTED LOGIC: Use a more flexible check for the family member details route
+  //  CORRECTED LOGIC: Use a more flexible check for the family member details route
   const showSidebar = [
     "/dashboard",
     "/family-members",
@@ -37,7 +37,7 @@ function Layout() {
     "/call-details"
   ].includes(location.pathname) || location.pathname.startsWith("/family/");
 
-  // ✅ Add mount/unmount logs to Layout
+  //  Add mount/unmount logs to Layout
   useEffect(() => {
     console.log("Layout Component Mounted!");
     return () => {

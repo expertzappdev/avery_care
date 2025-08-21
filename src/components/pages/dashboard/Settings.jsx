@@ -3,7 +3,11 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchFamilyMembersRequest } from "../../../redux/familySlice";
-import { fetchScheduledCallsRequest } from "../../../redux/callSlice";
+import {
+  fetchScheduledCallsRequest,
+  clearCallMessages,
+} from "../../../redux/callSlice";
+import { toast } from "react-toastify";
 import {
   User,
   Phone,
@@ -13,8 +17,10 @@ import {
   ChevronDown,
   ChevronUp,
   Mail,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
-import CallHistoryTable from "../dashboard/CallHistoryTable"; //  Path adjust kar lena
+import CallHistoryTable from "../dashboard/CallHistoryTable"; // Path to CallHistoryTable component
 
 const SettingsPage = () => {
   const [openSection, setOpenSection] = useState(null);
@@ -25,31 +31,34 @@ const SettingsPage = () => {
     (state) => state.call
   );
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
+
   const familyCount = familyMembers?.length || 0;
 
   useEffect(() => {
     dispatch(fetchFamilyMembersRequest());
     if (user?._id) {
-      dispatch(fetchScheduledCallsRequest({ userId: user._id }));
+      dispatch(
+        fetchScheduledCallsRequest({
+          page: currentPage,
+          limit: itemsPerPage,
+          
+          // `scheduledToId` filter ka upyog karke sirf user ke liye scheduled calls fetch karein
+          scheduledToId: user._id,
+        })
+      );
     }
-  }, [dispatch, user?._id]);
+  }, [dispatch, user?._id, currentPage, itemsPerPage]);
 
-  // --- Calls Filtering for Logged-in User ---
-  const allFetchedCallsArray = Object.values(scheduledCalls || {});
-  const callsForUser = allFetchedCallsArray.filter(
-    (call) =>
-      String(call.scheduledBy) === String(user?._id) ||
-      String(call.scheduledTo) === String(user?._id)
-  );
-  const displayedCallsForUser = callsForUser.filter(
-    (call) => call.status === "completed"
-  );
+  const allFetchedCallsArray = scheduledCalls?.data || [];
+  const totalCalls = scheduledCalls?.total || 0;
+  const totalPages = Math.ceil(totalCalls / itemsPerPage);
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
   };
 
-  // --- Avatar Generator ---
   const getAvatar = (name) => {
     const firstLetter = name ? name.charAt(0).toUpperCase() : "";
     return (
@@ -62,7 +71,6 @@ const SettingsPage = () => {
     );
   };
 
-  // ---------------- States for Phone + Password ----------------
   const [phoneData, setPhoneData] = useState({
     oldPhone: user?.phoneNumber || "",
     newPhone: "",
@@ -85,7 +93,7 @@ const SettingsPage = () => {
   };
 
   const updatePhone = () => {
-    alert(`Phone updated to: ${phoneData.newPhone}`);
+    toast.success(`Phone updated to: ${phoneData.newPhone}`);
     setPhoneData({ ...phoneData, newPhone: "", password: "" });
   };
 
@@ -102,10 +110,10 @@ const SettingsPage = () => {
 
   const updatePassword = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords do not match!");
+      toast.error("New passwords do not match!");
       return;
     }
-    alert("Password updated successfully!");
+    toast.success("Password updated successfully!");
     setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
   };
 
@@ -114,7 +122,13 @@ const SettingsPage = () => {
       "Are you sure you want to permanently delete your account? This action cannot be undone."
     );
     if (confirmDelete) {
-      alert("Your account has been deleted.");
+      toast.info("Your account is being deleted.");
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
@@ -124,7 +138,7 @@ const SettingsPage = () => {
         Settings
       </h2>
 
-      {/* -------- Profile Section (FamilyMemberDetails style) -------- */}
+      {/* -------- Personal Info Section -------- */}
       <div>
         <button
           type="button"
@@ -176,33 +190,52 @@ const SettingsPage = () => {
 
             {/* Call History */}
             <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">
-                Your Call History
-              </h2>
-              {callsLoading && displayedCallsForUser.length === 0 ? (
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Your Call History
+                </h2>
+                {totalPages > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || callsLoading}
+                      className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                      title="Previous Page"
+                    >
+                      <ArrowLeft className="w-4 h-4 text-gray-700" />
+                    </button>
+                    <span className="text-gray-700 text-sm font-medium">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || callsLoading}
+                      className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                      title="Next Page"
+                    >
+                      <ArrowRight className="w-4 h-4 text-gray-700" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {callsLoading && allFetchedCallsArray.length === 0 ? (
                 <p className="text-gray-500">
                   Loading call history for {user?.name}...
                 </p>
               ) : callsError ? (
                 <p className="text-red-500">Error loading calls: {callsError}</p>
               ) : (
-                <CallHistoryTable calls={displayedCallsForUser} />
+                <CallHistoryTable calls={allFetchedCallsArray} />
               )}
               {!callsLoading &&
                 !callsError &&
-                displayedCallsForUser.length === 0 && (
+                allFetchedCallsArray.length === 0 && (
                   <p className="text-gray-500 italic mt-4">
-                    No completed calls found for {user?.name}.
+                    No Calls found for {user?.name}.
                   </p>
                 )}
             </div>
-
-            {/* <div className="mt-6">
-              <p className="text-sm text-gray-500">Family Members Linked</p>
-              <p className="text-base font-semibold text-gray-900">
-                {familyCount}
-              </p>
-            </div> */}
           </div>
         )}
       </div>

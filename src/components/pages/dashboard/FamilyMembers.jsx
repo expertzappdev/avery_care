@@ -2,236 +2,220 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchFamilyMembersRequest,
-  addFamilyMemberRequest,
-  deleteFamilyMemberRequest,
+    fetchFamilyMembersRequest,
+    addFamilyMemberRequest,
+    deleteFamilyMemberRequest,
 } from "../../../redux/familySlice";
 import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 export default function FamilyMembers() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { familyMembers: familyList, loading } = useSelector(
-    (state) => state.family
-  );
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    relationship: "",
-    email: "",
-    phoneNumber: "+91", // ✅ Default value so input never breaks
-  });
+    // Redux state
+    const { familyMembers, loading, meta } = useSelector((state) => state.family);
 
-  useEffect(() => {
-    dispatch(fetchFamilyMembersRequest());
-  }, [dispatch]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleAddMember = () => {
-    if (
-      !formData.name ||
-      !formData.relationship ||
-      !formData.email ||
-      !formData.phoneNumber
-    ) {
-      alert(
-        "Please fill in ALL required fields (Name, Relationship, Email, Phone Number)."
-      );
-      return;
-    }
-
-    dispatch(addFamilyMemberRequest(formData));
-    // ✅ Reset but keep +91
-    setFormData({
-      name: "",
-      relationship: "",
-      email: "",
-      phoneNumber: "+91",
+    // Form state
+    const [formData, setFormData] = useState({
+        name: "",
+        relationship: "",
+        email: "",
+        phoneNumber: "+91", // Ensure initial format is correct for PhoneInput
     });
-  };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this family member?")) {
-      dispatch(deleteFamilyMemberRequest(id));
-    }
-  };
+    const [page, setPage] = useState(1);
+    const limit = 5; // ✅ Adjusted to match saga's default for consistency
 
-  const handleDetails = (member) => {
-    navigate(`/family/${member._id || member.id}`, { state: member });
-  };
+    // Fetch members on mount / page change
+    useEffect(() => {
+        dispatch(fetchFamilyMembersRequest({ page, limit }));
+    }, [dispatch, page, limit]); // Added 'limit' to dependency array
 
-  return (
-    <div className="flex flex-col md:flex-row sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
-      <div className="flex-1 rounded-xl space-y-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-          Add Family Member
-        </h1>
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-        <div className="space-y-5">
-          {[
-            { label: "Name", name: "name", type: "text", placeholder: "Enter name" },
-            {
-              label: "Relationship",
-              name: "relationship",
-              type: "text",
-              placeholder: "Enter relationship",
-            },
-            {
-              label: "Email",
-              name: "email",
-              type: "email",
-              placeholder: "Enter email",
-            },
-          ].map((field, idx) => (
-            <div key={idx}>
-              <label className="block font-medium mb-2 text-gray-700">
-                {field.label}
-              </label>
-              <input
-                type={field.type}
-                name={field.name}
-                value={formData[field.name]}
-                onChange={handleChange}
-                placeholder={field.placeholder}
-                className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] transition"
-              />
-            </div>
-          ))}
+    const handlePhoneChange = (value) => {
+        // Ensure the phone number always starts with '+'
+        setFormData({
+            ...formData,
+            phoneNumber: value.startsWith("+") ? value : "+" + value,
+        });
+    };
 
-          <div>
-            <label className="block font-medium mb-2 text-gray-700">
-              Phone Number
-            </label>
-            <PhoneInput
-              country={"in"}
-              onlyCountries={["in"]}
-              countryCodeEditable={false}
-              disableDropdown={true}
-              value={formData.phoneNumber}
-              onChange={(value) => {
-                // ✅ Always keep the + at start
-                if (!value.startsWith("+")) {
-                  value = "+" + value;
-                }
-                setFormData({ ...formData, phoneNumber: value });
-              }}
-              inputStyle={{
-                width: "90%",
-                marginLeft: "30px",
-                borderRadius: "0.375rem",
-                padding: "0.5rem 1rem",
-                height: "42px",
-                border: "1px solid #d1d5db",
-              }}
-              containerStyle={{
-                width: "100%",
-              }}
-            />
-          </div>
+    const handleAddMember = () => {
+        if (
+            !formData.name ||
+            !formData.relationship ||
+            !formData.email ||
+            !formData.phoneNumber ||
+            formData.phoneNumber === "+91" // Check if only country code is entered
+        ) {
+            alert("Please fill in all fields.");
+            return;
+        }
 
-          <div className="flex justify-center mt-6">
-            <button
-              onClick={handleAddMember}
-              disabled={loading}
-              className={`flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              {loading ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <UserPlusIcon className="w-5 h-5" />
-                  Add Family Member
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+        dispatch(addFamilyMemberRequest(formData));
+        setFormData({ name: "", relationship: "", email: "", phoneNumber: "+91" }); // Reset form
+    };
 
-      <div className="flex-1 mt-4 md:mt-4 rounded-xl">
-        <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-          Added Family Members
-        </h2>
+    const handleDelete = (id) => {
+        if (window.confirm("Are you sure you want to delete this family member?")) {
+            dispatch(deleteFamilyMemberRequest(id));
+        }
+    };
 
-        {loading && familyList.length === 0 && (
-          <p className="text-gray-500 italic mt-4">
-            Loading family members...
-          </p>
-        )}
+    const handleDetails = (member) => {
+        navigate(`/family/${member._id}`, { state: member });
+    };
 
-        {!loading && familyList.length === 0 ? (
-          <p className="text-gray-500 italic mt-4">
-            No family members added yet.
-          </p>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {Array.isArray(familyList) &&
-              familyList.map((member) => (
-                <div
-                  key={member._id}
-                  className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
-                >
-                  <div>
-                    <p className="font-medium text-lg text-gray-900">
-                      {member.name}
-                    </p>
-                    <p className="text-sm text-gray-500">{member.relationship}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleDelete(member._id)}
-                      disabled={loading}
-                      className={`text-red-500 hover:text-red-700 transition ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                      title="Delete"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDetails(member)}
-                      disabled={loading}
-                      className={`px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                    >
-                      Details
-                    </button>
-                  </div>
+    return (
+        <div className="flex flex-col md:flex-row sm:px-8 lg:px-12 gap-10 min-h-screen bg-white">
+            {/* Left: Add Form */}
+            <div className="flex-1 rounded-xl space-y-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+                    Add Family Member
+                </h1>
+
+                <div className="space-y-5">
+                    {["name", "relationship", "email"].map((field, idx) => (
+                        <div key={idx}>
+                            <label className="block font-medium mb-2 text-gray-700 capitalize">
+                                {field}
+                            </label>
+                            <input
+                                type={field === "email" ? "email" : "text"}
+                                name={field}
+                                value={formData[field]}
+                                onChange={handleChange}
+                                placeholder={`Enter ${field}`}
+                                className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] transition"
+                            />
+                        </div>
+                    ))}
+
+                    <div>
+                        <label className="block font-medium mb-2 text-gray-700">
+                            Phone Number
+                        </label>
+                        <PhoneInput
+                            country={"in"}
+                            onlyCountries={["in"]}
+                            countryCodeEditable={false}
+                            disableDropdown={true}
+                            value={formData.phoneNumber}
+                            onChange={handlePhoneChange} // Use the new handler
+                            inputStyle={{
+                                width: "90%",
+                                marginLeft: "30px",
+                                borderRadius: "0.375rem",
+                                padding: "0.5rem 1rem",
+                                height: "42px",
+                                border: "1px solid #d1d5db",
+                            }}
+                            containerStyle={{ width: "100%" }}
+                        />
+                    </div>
+
+                    <div className="flex justify-center mt-6">
+                        <button
+                            onClick={handleAddMember}
+                            disabled={loading} // Consider more granular loading states if UX requires
+                            className={`flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base ${
+                                loading ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
+                        >
+                            <UserPlusIcon className="w-5 h-5" />
+                            {loading ? "Processing..." : "Add Family Member"}
+                        </button>
+                    </div>
                 </div>
-              ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+            </div>
+
+            {/* Right: Members List */}
+            <div className="flex-1 mt-4 md:mt-4 rounded-xl">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-semibold text-gray-800">
+                        Added Family Members
+                    </h2>
+
+                    {/* Pagination Controls */}
+                    <div className="flex items-center space-x-4">
+                        <button
+                            disabled={page === 1}
+                            onClick={() => setPage(page - 1)}
+                            className={`p-2 rounded-full ${
+                                page === 1
+                                    ? "opacity-40"
+                                    : "hover:bg-gray-200"
+                            }`}
+                        >
+                            <ChevronLeft size={24} />
+                        </button>
+
+                        <span className="text-sm font-medium">
+                            Page {meta?.page || page}
+                        </span>
+
+                        <button
+                            disabled={!meta?.hasNextPage}
+                            onClick={() => setPage(page + 1)}
+                            className={`p-2 rounded-full ${
+                                !meta?.hasNextPage
+                                    ? "opacity-40 cursor"
+                                    : "hover:bg-gray-200"
+                            }`}
+                        >
+                            <ChevronRight size={24} />
+                        </button>
+                    </div>
+                </div>
+
+                {loading && familyMembers.length === 0 && (
+                    <p className="text-gray-500 italic mt-4">Loading family members...</p>
+                )}
+
+                {!loading && familyMembers.length === 0 ? (
+                    <p className="text-gray-500 italic mt-4">
+                        No family members added yet.
+                    </p>
+                ) : (
+                    <div className="divide-y divide-gray-200">
+                        {familyMembers.map((member) => (
+                            <div
+                                key={member._id}
+                                className="flex items-center justify-between py-4 px-2 hover:bg-gray-50 rounded-lg transition"
+                            >
+                                <div>
+                                    <p className="font-medium text-lg text-gray-900">
+                                        {member.name}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        {member.relationship}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => handleDelete(member._id)}
+                                        className="text-red-500 hover:text-red-700 transition"
+                                    >
+                                        <TrashIcon className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDetails(member)}
+                                        className="px-4 py-1 text-sm font-medium text-[#3fbf81] border border-[#3fbf81] rounded-full hover:bg-[#3fbf81] hover:text-white transition"
+                                    >
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
 }

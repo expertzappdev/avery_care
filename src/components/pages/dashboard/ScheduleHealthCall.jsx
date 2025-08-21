@@ -7,7 +7,8 @@ import {
   PhoneArrowUpRightIcon,
   PencilSquareIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/24/outline"; // Other icons are used here
+
 import { toast } from "react-toastify";
 
 import { fetchFamilyMembersRequest } from "../../../redux/familySlice";
@@ -26,6 +27,8 @@ export default function ScheduleHealthCall() {
   const [editingId, setEditingId] = useState(null);
   const [editedDate, setEditedDate] = useState("");
   const [editedTime, setEditedTime] = useState("");
+  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [itemsPerPage] = useState(5); // State for items per page (fixed for now)
 
   const dispatch = useDispatch();
   const { familyMembers } = useSelector((state) => state.family);
@@ -35,12 +38,16 @@ export default function ScheduleHealthCall() {
     (state) => state.call
   );
 
-  // Filter for ONLY pending calls to display on this specific page
-  const allFetchedCalls = Object.values(scheduledCalls || {});
+  // Ensure scheduledCalls.data is always an array
+  const allFetchedCalls = Array.isArray(scheduledCalls?.data) ? scheduledCalls.data : [];
+  const totalCalls = scheduledCalls?.total || 0; // Get total from backend response
+
+  // Filter for ONLY pending calls to display on this specific page (from the currently fetched page data)
   const pendingCallsArray = allFetchedCalls.filter(
     (call) => call.status === "pending"
   );
 
+  // Combine user and family members for the dropdown
   const allMembers = [
     ...(user?.name ? [{ _id: user._id, name: user.name }] : []),
     ...(familyMembers || []),
@@ -48,22 +55,31 @@ export default function ScheduleHealthCall() {
 
   // --- Logic to prevent past date/time selection ---
   const now = new Date();
-  const todayDate = now.toISOString().split("T")[0];
-  const nowTime = now.toTimeString().slice(0, 5);
+  const todayDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+  const nowTime = now.toTimeString().slice(0, 5); // HH:MM
 
   const minTimeForToday = selectedDate === todayDate ? nowTime : "00:00";
   // --- End of logic ---
 
+  // Fetch family members on component mount
   useEffect(() => {
     dispatch(fetchFamilyMembersRequest());
   }, [dispatch]);
 
+  // Fetch scheduled calls whenever user, currentPage, or itemsPerPage changes
   useEffect(() => {
     if (user?._id) {
-      dispatch(fetchScheduledCallsRequest({ userId: user._id }));
+      // Pass pagination parameters to the fetch request.
+      // The scheduledBy filter is handled by the protect middleware on the backend.
+      dispatch(fetchScheduledCallsRequest({
+        page: currentPage,
+        limit: itemsPerPage,
+        status: 'pending' // Only fetch pending calls for this view
+      }));
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, currentPage, itemsPerPage]);
 
+  // Handle Redux error and success messages with toasts
   useEffect(() => {
     if (error) {
       toast.error(`❌ Error: ${error}`);
@@ -75,13 +91,14 @@ export default function ScheduleHealthCall() {
     }
   }, [error, message, dispatch]);
 
+  // Handler for scheduling a new call
   const handleSchedule = () => {
     if (!selectedMember || !selectedDate || !selectedTime) {
       toast.error("⚠️ Please fill all fields before scheduling.");
       return;
     }
 
-    // --- Final validation to block past times ---
+    // Final validation to block scheduling calls in the past
     const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
     if (selectedDateTime < now) {
       toast.error("⚠️ You cannot schedule a call in the past.");
@@ -114,14 +131,17 @@ export default function ScheduleHealthCall() {
       toast.error("⚠️ Please select a valid family member from the list.");
     }
 
+    // Clear form fields after scheduling attempt
     setSelectedMember("");
     setSelectedDate("");
     setSelectedTime("");
   };
 
+  // Handler for opening/closing edit mode for a scheduled call
   const handleEdit = (callId, currentScheduledAt) => {
     setEditingId(editingId === callId ? null : callId);
     if (editingId !== callId) {
+      // Populate edit fields with current call data
       const date = new Date(currentScheduledAt);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -133,6 +153,7 @@ export default function ScheduleHealthCall() {
     }
   };
 
+  // Handler for updating a scheduled call
   const handleUpdate = (callId) => {
     if (!editedDate || !editedTime) {
       toast.error("⚠️ Please select new date and time for update.");
@@ -143,20 +164,23 @@ export default function ScheduleHealthCall() {
     dispatch(
       updateScheduledCallRequest({ id: callId, scheduledAt: newScheduledAt })
     );
-    setEditingId(null);
+    setEditingId(null); // Exit editing mode
   };
 
+  // Handler for deleting a scheduled call
   const handleDelete = (callId) => {
     if (window.confirm("Are you sure you want to delete this scheduled call?")) {
       dispatch(deleteScheduledCallRequest(callId));
     }
   };
 
+  // Utility function to format date
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-GB");
   };
 
+  // Utility function to format time
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleTimeString("en-US", {
@@ -164,6 +188,16 @@ export default function ScheduleHealthCall() {
       minute: "2-digit",
       hour12: false,
     });
+  };
+
+  // Calculate total pages for pagination
+  const totalPages = Math.ceil(totalCalls / itemsPerPage);
+
+  // Handle pagination page changes
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
   };
 
   return (
@@ -247,7 +281,34 @@ export default function ScheduleHealthCall() {
 
       {/* Section for Upcoming Pending Calls */}
       <div className="max-w-2xl mt-0">
-        <h2 className="text-xl font-semibold mb-4">Upcoming Pending Calls</h2>{" "}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Upcoming Pending Calls</h2>{" "}
+          {/* Pagination Controls moved here */}
+          {totalPages > 1 && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || loading}
+                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 font-bold text-lg leading-none" // Added text styles
+                title="Previous Page"
+              >
+                &laquo; {/* Unicode left arrow */}
+              </button>
+              <span className="text-gray-700 text-sm font-medium">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || loading}
+                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 font-bold text-lg leading-none" // Added text styles
+                title="Next Page"
+              >
+                &raquo; {/* Unicode right arrow */}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="space-y-4">
           {pendingCallsArray.length === 0 && !loading ? (
             <p className="text-gray-500">No upcoming pending calls.</p>

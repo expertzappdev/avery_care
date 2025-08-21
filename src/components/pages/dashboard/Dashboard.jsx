@@ -29,20 +29,37 @@ export default function Dashboard() {
     (state) => state.call
   );
 
+  // Correctly access the 'data' array from the scheduledCalls object
+  const allCallsArray = scheduledCalls?.data || [];
+  // Correct pagination state (though not directly used for next call logic here, good to have)
+  const currentPage = scheduledCalls?.page || 1;
+  const itemsPerPage = scheduledCalls?.limit || 5; // Use the limit from the Redux state
+
   useEffect(() => {
     if (user?._id) {
-      dispatch(fetchScheduledCallsRequest({ userId: user._id }));
+      // Dispatch fetchScheduledCallsRequest with pagination and status 'pending'
+      // To ensure we get relevant calls for "next scheduled call"
+      // You might need to adjust `limit` if you expect many pending calls
+      // or fetch all pending calls without limit for this specific dashboard logic.
+      // For now, setting a high limit to get all relevant pending calls for sorting.
+      dispatch(fetchScheduledCallsRequest({
+        page: 1, // Start from page 1
+        limit: 100, // Fetch a reasonable number of pending calls to find the next one
+        status: 'pending', // IMPORTANT: Filter for pending calls only
+      }));
     }
   }, [dispatch, user]);
 
   const findNextScheduledCall = () => {
-    const allCallsArray = Object.values(scheduledCalls || {});
+    // Now, `allCallsArray` already contains the `data` from the Redux state.
+    // The useEffect above ensures we fetch 'pending' calls.
     const pendingCalls = allCallsArray.filter(call => call.status === 'pending');
 
     if (pendingCalls.length === 0) {
       return null;
     }
 
+    // Sort by scheduledAt date to find the earliest upcoming call
     pendingCalls.sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt));
     const nextCall = pendingCalls[0];
 
@@ -91,10 +108,15 @@ export default function Dashboard() {
       toast.error("User ID not found! Please login again. ❌");
       return;
     }
+    // For an immediate call, you might want to schedule it for "now" or a few seconds in the future
+    const now = new Date();
+    // Add a small buffer (e.g., 5 seconds) to ensure it's slightly in the future
+    now.setSeconds(now.getSeconds() + 5); 
+
     dispatch(
       scheduleHealthCallRequest({
         scheduledTo: user._id,
-        scheduledAt: new Date().toISOString(),
+        scheduledAt: now.toISOString(), // Use current time + buffer
       })
     );
   };

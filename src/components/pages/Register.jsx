@@ -31,7 +31,7 @@ export default function Signup() {
  const handlePhoneChange = (value, country) => {
   setFormData((prevData) => ({
     ...prevData,
-    phoneNumber: `+${value}`, // ✅ Force plus sign
+    phoneNumber: `+${value}`, //  Force plus sign
   }));
 };
 
@@ -46,7 +46,7 @@ export default function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ Send phone number with country code directly
+    // Send phone number with country code directly
     dispatch(signupRequest(formData));
   };
 

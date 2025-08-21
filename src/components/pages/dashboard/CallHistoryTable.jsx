@@ -1,10 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeftIcon, ArrowRightIcon, TrashIcon } from "@heroicons/react/24/outline"; // TrashIcon import kiya gaya hai
+import { useDispatch, useSelector } from "react-redux"; // Dispatch aur Selector import kiya gaya hai
+import { deleteScheduledCallRequest } from "../../../redux/callSlice"; // deleteScheduledCallRequest import kiya gaya hai
+import { toast } from "react-toastify"; // toast import kiya gaya hai
 
-export default function CallHistoryTable({ calls }) {
+export default function CallHistoryTable({ calls, totalPages, currentPage, onPageChange, loading }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const callsLoading = useSelector(state => state.call.loading);
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     try {
@@ -16,7 +21,6 @@ export default function CallHistoryTable({ calls }) {
     }
   };
 
-  // Format time
   const formatTime = (dateStr) => {
     if (!dateStr) return "N/A";
     try {
@@ -32,75 +36,118 @@ export default function CallHistoryTable({ calls }) {
     }
   };
 
-  // AI Summary display
   const displayAiSummary = (aiSummaryValue) => {
-    return aiSummaryValue || "No summary available";
+    if (!aiSummaryValue) {
+      return "No summary available";
+    }
+    const characterLimit = 100;
+    const lines = aiSummaryValue.split('\n');
+    if (lines.length > 2) {
+      return lines.slice(0, 2).join(' ') + '...';
+    }
+    if (aiSummaryValue.length > characterLimit) {
+      return aiSummaryValue.substring(0, characterLimit) + '...';
+    }
+    return aiSummaryValue;
+  };
+  
+  const handleDelete = (callId) => {
+    if (window.confirm("Are you sure you want to delete this completed call?")) {
+      dispatch(deleteScheduledCallRequest(callId));
+    }
   };
 
+
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <table className="w-full border-collapse">
-        {/* Table Head */}
-        <thead>
-          <tr className="bg-gray-100 text-left text-gray-700">
-            {/* Name visible on all screens */}
-            <th className="py-3 px-4 font-medium text-sm sm:text-base">Name</th>
-            {/* Date visible only on sm+ screens, hidden on smaller screens */}
-            <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
-            {/* Time and Key Topics visible only on sm+ screens */}
-            <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Time</th>
-            <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Key Topics</th>
-            <th className="py-3 px-4 font-medium text-sm sm:text-base">Actions</th>
-          </tr>
-        </thead>
-
-        {/* Table Body */}
-        <tbody>
-          {calls && calls.length > 0 ? (
-            calls.map((call) => (
-              <tr
-                key={call._id}
-                className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition"
-              >
-                {/* Recipient Name */}
-                <td className="py-3 px-4 text-sm sm:text-base">
-                  {call.recipientName || "N/A"}
-                </td>
-
-                {/* Date - Hidden on small screens, visible on sm+ */}
-                <td className="py-3 px-4 text-sm sm:text-base">
-                  {formatDate(call.scheduledAt)}
-                </td>
-
-                {/* Time & Key Topics only on larger screens */}
-                <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
-                  {formatTime(call.scheduledAt)}
-                </td>
-                <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
-                  {displayAiSummary(call.aiSummary)}
-                </td>
-
-                {/* View Details */}
-                <td
-                  className="py-3 px-4 text-[#3fbf81] font-medium cursor-pointer hover:underline text-xs sm:text-sm whitespace-nowrap"
-                  onClick={() => navigate("/call-details", { state: { callData: call } })}
+    <div>
+      <div className="overflow-x-auto rounded-lg border border-gray-200 max-w-full">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100 text-left text-gray-700">
+              <th className="py-3 px-4 font-medium text-sm sm:text-base">Name</th>
+              <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
+              <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Time</th>
+              <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Call Status</th>
+              <th className="py-3 px-4 font-medium text-sm sm:text-base">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {calls && calls.length > 0 ? (
+              calls.map((call) => (
+                <tr
+                  key={call._id}
+                  className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition"
                 >
-                  View Details
+                  <td className={`py-3 px-4 text-sm sm:text-base ${call.recipientName && call.recipientName.length > 12 ? 'whitespace-normal' : 'whitespace-nowrap'}`}>
+                    {call.recipientName || "N/A"}
+                  </td>
+                  <td className="py-3 px-4 text-sm sm:text-base">
+                    {formatDate(call.scheduledAt)}
+                  </td>
+                  <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                    {formatTime(call.scheduledAt)}
+                  </td>
+                  <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                    {displayAiSummary(call.status)}
+                  </td>
+                  <td className="py-3 px-4 text-xs sm:text-sm whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => navigate("/call-details", { state: { callData: call } })}
+                          className="text-[#3fbf81] font-medium cursor-pointer hover:underline"
+                        >
+                          View Details
+                        </button>
+                        <button
+                           onClick={() => handleDelete(call._id)}
+                           className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                           disabled={callsLoading}
+                           title="Delete Call"
+                        >
+                           <TrashIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="5"
+                  className="text-center py-6 text-gray-500 italic text-sm sm:text-base"
+                >
+                  No calls found for the selected filter.
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan="5" // Changed colspan to 5 due to the new 'Name' column
-                className="text-center py-6 text-gray-500 italic text-sm sm:text-base"
-              >
-                No calls found for the selected filter.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-6 space-x-4">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1 || loading}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            title="Previous Page"
+          >
+            <ArrowLeftIcon className="w-5 h-5 text-gray-700" />
+          </button>
+          <span className="text-gray-700 font-medium">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || loading}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            title="Next Page"
+          >
+            <ArrowRightIcon className="w-5 h-5 text-gray-700" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
 import authReducer from "./authSlice";
-import familyReducer from "./familySlice"; // ✅ ADD THIS
+import familyReducer from "./familySlice"; // ADD THIS
 import rootSaga from "./sagas";
 import callReducer from "./callSlice"; // Assuming you have a callSlice
 
@@ -18,7 +18,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  family: familyReducer, // ✅ ADD THIS
+  family: familyReducer, //  ADD THIS
   call:callReducer, // Assuming you have a callReducer
 });
 

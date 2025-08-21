@@ -4,9 +4,14 @@ const callSlice = createSlice({
   name: "call",
   initialState: {
     loading: false, // Indicates if an API call is in progress
-    error: null,    // Stores any error messages
-    scheduledCalls: {}, // Stores scheduled calls as an object for easy lookup by ID
-    message: null,  // Stores success messages from backend
+    error: null, // Stores any error messages
+    scheduledCalls: {
+      data: [], // Stores scheduled calls as an array for the current page
+      total: 0, // Total number of calls across all pages (for pagination)
+      page: 1, // Current page number (from backend response)
+      limit: 5, // Items per page (from backend response)
+    },
+    message: null, // Stores success messages from backend
   },
   reducers: {
     // Action for initiating a health call schedule
@@ -18,8 +23,6 @@ const callSlice = createSlice({
     // Action for successful health call scheduling
     scheduleHealthCallSuccess: (state, action) => {
       state.loading = false;
-      // Adds the new scheduled call to the scheduledCalls object
-      state.scheduledCalls[action.payload.scheduledCall._id] = action.payload.scheduledCall;
       state.message = action.payload.message;
     },
     // Action for failed health call scheduling
@@ -30,15 +33,22 @@ const callSlice = createSlice({
     },
 
     // Action for initiating fetching of scheduled calls
-    fetchScheduledCallsRequest: (state) => {
+    fetchScheduledCallsRequest: (state, action) => { // 'action' contains page/limit payload
       state.loading = true;
       state.error = null;
       state.message = null;
+      // Optionally update state.scheduledCalls.page and limit here
+      // state.scheduledCalls.page = action.payload.page || 1;
+      // state.scheduledCalls.limit = action.payload.limit || 5;
     },
     // Action for successful fetching of scheduled calls
     fetchScheduledCallsSuccess: (state, action) => {
       state.loading = false;
-      state.scheduledCalls = action.payload; // Payload is the transformed data object from backend
+      // Payload is now expected to be an object: { success, data: callsArray, total, page, limit, etc. }
+      state.scheduledCalls.data = action.payload.data;
+      state.scheduledCalls.total = action.payload.total;
+      state.scheduledCalls.page = action.payload.page;
+      state.scheduledCalls.limit = action.payload.limit;
       state.error = null;
     },
     // Action for failed fetching of scheduled calls
@@ -57,8 +67,6 @@ const callSlice = createSlice({
     // Action for successful update of a scheduled call
     updateScheduledCallSuccess: (state, action) => {
       state.loading = false;
-      // Updates the specific call in the scheduledCalls object
-      state.scheduledCalls[action.payload.data.call._id] = action.payload.data.call;
       state.message = action.payload.message;
     },
     // Action for failed update of a scheduled call
@@ -77,8 +85,6 @@ const callSlice = createSlice({
     // Action for successful deletion of a scheduled call
     deleteScheduledCallSuccess: (state, action) => {
       state.loading = false;
-      // Removes the deleted call from the scheduledCalls object
-      delete state.scheduledCalls[action.payload.data.deletedCall._id];
       state.message = action.payload.message;
     },
     // Action for failed deletion of a scheduled call

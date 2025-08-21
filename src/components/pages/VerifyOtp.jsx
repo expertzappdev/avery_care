@@ -21,8 +21,6 @@ export default function VerifyOtp() {
   const emailToVerify = initialEmail || storedEmail;
   const phoneToVerify = initialPhone; // If you want to make fallback from Redux, you can do that too
 
-  
-
   const [emailOtp, setEmailOtp] = useState("");
   const [mobileOtp, setMobileOtp] = useState("");
 
@@ -34,17 +32,16 @@ export default function VerifyOtp() {
   }, [isAuthenticated, verified, navigate]);
 
   useEffect(() => {
-  if (successMessage) {
-    // toast.success(successMessage, { position: "top-right" });
-    dispatch(clearSuccessMessage());
+    if (successMessage) {
+      // toast.success(successMessage, { position: "top-right" });
+      dispatch(clearSuccessMessage());
 
-    // ✅ Navigate to login if user is verified (ignore isAuthenticated)
-    if (verified) {
-      navigate("/login");
+      //  Navigate to login if user is verified (ignore isAuthenticated)
+      if (verified) {
+        navigate("/login");
+      }
     }
-  }
-}, [successMessage, dispatch, navigate, verified]);
-
+  }, [successMessage, dispatch, navigate, verified]);
 
   useEffect(() => {
     if (error) {
@@ -65,39 +62,46 @@ export default function VerifyOtp() {
       // toast.error("Please enter both OTPs.", { position: "top-right" });
       return;
     }
-    dispatch(verifyOtpRequest({
-      email: emailToVerify,
-      emailOtp,
-      mobileOtp
-    }));
+    dispatch(
+      verifyOtpRequest({
+        email: emailToVerify,
+        emailOtp,
+        mobileOtp,
+      })
+    );
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-4 lg:px-4">
-      <div className="max-w-md w-full space-y-8 p-8 border border-gray-100 rounded-lg">
+      <div className="max-w-md w-full space-y-8 p-8 mt-[-12] border border-gray-100 shadow-xs rounded-lg">
         <div className="text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Verify OTP</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+            Verify OTP
+          </h2>
           <p className="mt-2 text-gray-600 text-sm sm:text-base">
-  Enter the OTPs sent to:
-  <br />
-  <strong className="font-semibold text-[#3fbf81]">Email: {emailToVerify}</strong>
-  <br />
-  <strong className="font-semibold text-[#3fbf81]">Phone: {phoneToVerify}</strong>
-</p>
-
+            Enter the OTPs sent to:
+            <br />
+            <strong className="font-semibold text-[#3fbf81]">
+              Email: {emailToVerify}
+            </strong>
+            <br />
+            <strong className="font-semibold text-[#3fbf81]">
+              Phone: {phoneToVerify}
+            </strong>
+          </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* Email OTP */}
           <div>
-            <label htmlFor="emailOtp" className="sr-only">Email OTP</label>
+            <label htmlFor="emailOtp" className="sr-only">
+              Email OTP
+            </label>
             <input
               id="emailOtp"
               name="emailOtp"
               type="text"
-              maxLength="4"
               inputMode="numeric"
-              pattern="[0-9]{4}"
               required
               autoComplete="one-time-code"
               placeholder="Enter Email OTP"
@@ -110,14 +114,14 @@ export default function VerifyOtp() {
 
           {/* Mobile OTP */}
           <div>
-            <label htmlFor="mobileOtp" className="sr-only">Mobile OTP</label>
+            <label htmlFor="mobileOtp" className="sr-only">
+              Mobile OTP
+            </label>
             <input
               id="mobileOtp"
               name="mobileOtp"
               type="text"
-              maxLength="4"
               inputMode="numeric"
-              pattern="[0-9]{4}"
               required
               autoComplete="one-time-code"
               placeholder="Enter Mobile OTP"

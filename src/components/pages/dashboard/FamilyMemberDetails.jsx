@@ -1,72 +1,78 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import CallHistoryTable from "./CallHistoryTable"; // Path adjust kar lena
+import { ArrowLeftIcon, PencilSquareIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import CallHistoryTable from "../dashboard/CallHistoryTable";
 import { useDispatch, useSelector } from "react-redux";
 import {
   updateFamilyMemberRequest,
   setSelectedFamilyMember,
   fetchFamilyMembersRequest,
-} from "../../../redux/familySlice"; // Path adjust kar lena
-import { fetchScheduledCallsRequest } from "../../../redux/callSlice.js"; // Call slice import karein
+} from "../../../redux/familySlice";
+import { fetchScheduledCallsRequest } from "../../../redux/callSlice.js";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
 export default function FamilyMemberDetails() {
-  const { id } = useParams(); // Family Member ki ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { selectedFamilyMember, familyMembers, loading, error } = useSelector(
     (state) => state.family
   );
-  // Redux se saari calls, loading, error states lein
   const { scheduledCalls, loading: callsLoading, error: callsError } = useSelector(
     (state) => state.call
   );
-  const loggedInUserId = useSelector((state) => state.auth.user._id); // Logged-in user ki ID
+  const loggedInUserId = useSelector((state) => state.auth.user._id);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const member =
     selectedFamilyMember ||
-    familyMembers.find((m) => m._id === id || m.id === id); // ID string ya ObjectId ho sakti hai
+    familyMembers.find((m) => m._id === id || m.id === id);
 
-  // Fetch family members if not already loaded
   useEffect(() => {
     if (!familyMembers.length) {
       dispatch(fetchFamilyMembersRequest());
     }
   }, [dispatch, familyMembers.length]);
 
-  // Set selectedFamilyMember in Redux
   useEffect(() => {
     if (member && (!selectedFamilyMember || selectedFamilyMember._id !== member._id)) {
       dispatch(setSelectedFamilyMember(member));
     }
   }, [dispatch, selectedFamilyMember, member]);
 
-  // Fetch calls specific to this family member
+  // Fetch calls specific to this family member with pagination
   useEffect(() => {
-    if (loggedInUserId) { // Ensure logged-in user ID is available
-      dispatch(fetchScheduledCallsRequest({ userId: loggedInUserId }));
+    if (loggedInUserId) {
+      dispatch(
+        fetchScheduledCallsRequest({
+          page: currentPage,
+          limit: itemsPerPage,
+          scheduledToId: id,
+        })
+      );
     }
-  }, [dispatch, loggedInUserId]); // Dependency on loggedInUserId
+  }, [dispatch, loggedInUserId, id, currentPage, itemsPerPage]);
 
   const [editData, setEditData] = useState({
     name: member?.name || "",
     relationship: member?.relationship || "",
-    email: member?.email || "", // Default email removed, better to be empty or handle on backend
+    email: member?.email || "",
     phone: member?.phone?.replace(/^\+91/, "") || "",
   });
 
-  // Update editData when member object changes
+  // FIX: Yeh useEffect ab `member` object ke change hone par `editData` state ko dobara set karega,
+  // jisse component naye data ke saath update ho jayega.
   useEffect(() => {
     if (member) {
       setEditData({
         name: member.name || "",
         relationship: member.relationship || "",
-        email: member.email || "", // Default email removed
+        email: member.email || "",
         phone: member.phone?.replace(/^\+91/, "") || "",
       });
     }
@@ -83,7 +89,7 @@ export default function FamilyMemberDetails() {
         updatedData: {
           name: editData.name,
           email: editData.email,
-          phoneNumber: `+91${editData.phone}`, // Ensure to send with +91 prefix
+          phoneNumber: `+91${editData.phone}`,
           relationship: editData.relationship,
         },
       })
@@ -91,9 +97,6 @@ export default function FamilyMemberDetails() {
     setIsEditing(false);
   };
 
-  // Update selectedFamilyMember in Redux when familyMembers list updates (after save)
-  // This useEffect ensures the local 'member' variable and selectedFamilyMember in Redux
-  // are in sync with the latest data from familyMembers array, which is updated by saga.
   useEffect(() => {
     const updatedMember = familyMembers.find((m) => m._id === id || m.id === id);
     if (updatedMember && (!selectedFamilyMember || updatedMember._id !== selectedFamilyMember._id)) {
@@ -101,39 +104,29 @@ export default function FamilyMemberDetails() {
     }
   }, [familyMembers, id, dispatch, selectedFamilyMember]);
 
-
-  // --- Filtering Calls for this Specific Family Member ---
-  const allFetchedCallsArray = Object.values(scheduledCalls || {}); // All calls the logged-in user can see
-
-  const callsForThisMember = allFetchedCallsArray.filter(call => {
-    // Check if the current family member is either the scheduler or the recipient of the call
-    // Make sure to compare IDs as strings as one might be ObjectId and other string
-    return (
-      String(call.scheduledBy) === String(id) || // If this family member scheduled the call
-      String(call.scheduledTo) === String(id)     // If this family member is the recipient of the call
-    );
-  });
-
-  // Decide what status calls to show (e.g., only completed calls for history)
-  const displayedCallsForMember = callsForThisMember.filter(call => call.status === 'completed');
-  // --- END Filtering Calls ---
-
-  // Function to generate avatar
   const getAvatar = (name) => {
     const firstLetter = name ? name.charAt(0).toUpperCase() : '';
     return (
       <div
         className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-white font-bold text-3xl sm:text-4xl"
-        style={{ backgroundColor: '#3fbf81' }} // Your theme color
+        style={{ backgroundColor: '#3fbf81' }}
       >
         {firstLetter}
       </div>
     );
   };
 
+  const allFetchedCallsArray = scheduledCalls?.data || [];
+  const totalCalls = scheduledCalls?.total || 0;
+  const totalPages = Math.ceil(totalCalls / itemsPerPage);
+
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   if (!member && !loading) {
-    // If no member is found after loading, it means the ID might be invalid
     return (
       <div className="p-5">
         <p className="text-red-500">Family member not found.</p>
@@ -156,16 +149,11 @@ export default function FamilyMemberDetails() {
     );
   }
 
-
   return (
     <div className="sm:ml-8 md:ml-0 min-h-screen bg-white">
-      {/* <p className="text-xs sm:text-sm text-gray-500 mb-4">
-        Family Members / <span className="text-gray-700 font-medium">{member?.name}</span>
-      </p> */}
-
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-xl">
         <div className="flex items-center gap-4">
-          {getAvatar(member?.name)} {/* Using the dynamic avatar function */}
+          {getAvatar(member?.name)}
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">{editData.name}</h1>
             <p className="text-gray-600 text-sm sm:text-base">{editData.relationship}</p>
@@ -211,8 +199,7 @@ export default function FamilyMemberDetails() {
               </div>
             ))}
 
-            {/* Custom Phone Input with 🇮🇳 flag & +91 */}
-            <div>
+            <div className="flex flex-col">
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
               <PhoneInput
                 country={"in"}
@@ -264,18 +251,48 @@ export default function FamilyMemberDetails() {
       </div>
 
       <div className="mt-6 p-5 rounded-xl">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">Call History</h2>
-        {/* Pass filtered calls to CallHistoryTable */}
-        {callsLoading && displayedCallsForMember.length === 0 ? (
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">Call History</h2>
+          {totalPages > 1 && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1 || callsLoading}
+                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                title="Previous Page"
+              >
+                <ArrowLeftIcon className="w-4 h-4 text-gray-700" />
+              </button>
+              <span className="text-gray-700 text-sm font-medium">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages || callsLoading}
+                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+                title="Next Page"
+              >
+                <ArrowRightIcon className="w-4 h-4 text-gray-700" />
+              </button>
+            </div>
+          )}
+        </div>
+        {callsLoading && allFetchedCallsArray.length === 0 ? (
           <p className="text-gray-500">Loading call history for {member?.name}...</p>
         ) : callsError ? (
           <p className="text-red-500">Error loading calls: {callsError}</p>
         ) : (
-          <CallHistoryTable calls={displayedCallsForMember} />
+          <CallHistoryTable
+            calls={allFetchedCallsArray}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            loading={callsLoading}
+          />
         )}
-        {!callsLoading && !callsError && displayedCallsForMember.length === 0 && (
+        {!callsLoading && !callsError && allFetchedCallsArray.length === 0 && (
           <p className="text-gray-500 italic mt-4">
-            No completed calls found for {member?.name}.
+            No Calls found for {member?.name}.
           </p>
         )}
       </div>
