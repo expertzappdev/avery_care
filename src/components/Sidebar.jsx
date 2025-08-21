@@ -19,7 +19,7 @@ const navItems = [
 export default function Sidebar() {
   return (
     // Mobile (<768px) me bilkul hide, md aur upar me show
-    <aside className="hidden md:flex min-h-screen bg-white border-r border-gray-200 flex-col w-12 md:w-72 transition-all duration-300 pt-8">
+    <aside className="hidden xl:flex min-h-screen bg-white border-r border-gray-200 flex-col w-12 md:w-72 transition-all duration-300 pt-8">
       <nav className="flex flex-col gap-2 mt-0 md:mt-4">
         {navItems.map((item) => (
           <NavLink

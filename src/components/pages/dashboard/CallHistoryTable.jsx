@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeftIcon, ArrowRightIcon, TrashIcon } from "@heroicons/react/24/outline"; // TrashIcon import kiya gaya hai
-import { useDispatch, useSelector } from "react-redux"; // Dispatch aur Selector import kiya gaya hai
-import { deleteScheduledCallRequest } from "../../../redux/callSlice"; // deleteScheduledCallRequest import kiya gaya hai
-import { toast } from "react-toastify"; // toast import kiya gaya hai
+import { ArrowLeftIcon, ArrowRightIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteScheduledCallRequest } from "../../../redux/callSlice";
+import { toast } from "react-toastify";
 
-export default function CallHistoryTable({ calls, totalPages, currentPage, onPageChange, loading }) {
+export default function CallHistoryTable({ calls, totalPages, currentPage, onPageChange, loading, scheduledToId }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const callsLoading = useSelector(state => state.call.loading);
@@ -50,13 +50,12 @@ export default function CallHistoryTable({ calls, totalPages, currentPage, onPag
     }
     return aiSummaryValue;
   };
-  
+
   const handleDelete = (callId) => {
-    if (window.confirm("Are you sure you want to delete this completed call?")) {
-      dispatch(deleteScheduledCallRequest(callId));
+    if (window.confirm("Are you sure you want to delete this call?")) {
+      dispatch(deleteScheduledCallRequest({ callId, scheduledToId }));
     }
   };
-
 
   return (
     <div>
@@ -64,11 +63,13 @@ export default function CallHistoryTable({ calls, totalPages, currentPage, onPag
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-100 text-left text-gray-700">
-              <th className="py-3 px-4 font-medium text-sm sm:text-base">Name</th>
-              <th className="py-3 px-4 font-medium text-sm sm:text-base">Date</th>
-              <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Time</th>
-              <th className="hidden sm:table-cell py-3 px-4 font-medium text-sm sm:text-base">Call Status</th>
-              <th className="py-3 px-4 font-medium text-sm sm:text-base">Actions</th>
+              <th className="py-2 px-3 font-medium text-sm sm:text-base">Name</th>
+              <th className="py-2 px-3 font-medium text-sm sm:text-base text-center">Date</th>
+              <th className="hidden sm:table-cell py-2 px-3 font-medium text-sm sm:text-base text-center">Time</th>
+              <th className="hidden sm:table-cell py-2 px-3 font-medium text-sm sm:text-base text-center">Call Status</th>
+              <th className="hidden sm:table-cell py-2 px-3 font-medium text-sm sm:text-base text-center">Details</th>
+              <th className="hidden sm:table-cell py-2 px-3 font-medium text-sm sm:text-base text-center">Delete</th>
+              <th className="sm:hidden py-2 px-3 font-medium text-sm text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -78,34 +79,56 @@ export default function CallHistoryTable({ calls, totalPages, currentPage, onPag
                   key={call._id}
                   className="border-b border-gray-200 last:border-none hover:bg-gray-50 transition"
                 >
-                  <td className={`py-3 px-4 text-sm sm:text-base ${call.recipientName && call.recipientName.length > 12 ? 'whitespace-normal' : 'whitespace-nowrap'}`}>
+                  <td className={`py-2 px-3 text-sm sm:text-base ${call.recipientName && call.recipientName.length > 12 ? 'whitespace-normal' : 'whitespace-nowrap'}`}>
                     {call.recipientName || "N/A"}
                   </td>
-                  <td className="py-3 px-4 text-sm sm:text-base">
+                  <td className="py-2 px-3 text-sm sm:text-base text-center">
                     {formatDate(call.scheduledAt)}
                   </td>
-                  <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                  <td className="hidden sm:table-cell py-2 px-3 text-sm sm:text-base text-center">
                     {formatTime(call.scheduledAt)}
                   </td>
-                  <td className="hidden sm:table-cell py-3 px-4 text-sm sm:text-base">
+                  <td className="hidden sm:table-cell py-2 px-3 text-sm sm:text-base text-center">
                     {displayAiSummary(call.status)}
                   </td>
-                  <td className="py-3 px-4 text-xs sm:text-sm whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => navigate("/call-details", { state: { callData: call } })}
-                          className="text-[#3fbf81] font-medium cursor-pointer hover:underline"
-                        >
-                          View Details
-                        </button>
-                        <button
-                           onClick={() => handleDelete(call._id)}
-                           className="text-red-500 hover:text-red-700 disabled:opacity-50"
-                           disabled={callsLoading}
-                           title="Delete Call"
-                        >
-                           <TrashIcon className="w-5 h-5" />
-                        </button>
+
+                  {/* Large Screen: Details + Delete separate */}
+                  <td className="hidden sm:table-cell py-2 px-3 text-xs sm:text-sm whitespace-nowrap text-center">
+                    <button
+                      onClick={() => navigate("/call-details", { state: { callData: call } })}
+                      className="text-[#3fbf81] font-medium cursor-pointer hover:underline"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                  <td className="hidden sm:table-cell py-2 px-3 text-xs sm:text-sm whitespace-nowrap text-center">
+                    <button
+                      onClick={() => handleDelete(call._id)}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                      disabled={callsLoading}
+                      title="Delete Call"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </td>
+
+                  {/* Mobile Screen: Actions combined */}
+                  <td className="sm:hidden py-2 px-3 text-xs sm:text-sm whitespace-nowrap text-center">
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => navigate("/call-details", { state: { callData: call } })}
+                        className="text-[#3fbf81] font-medium cursor-pointer hover:underline"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleDelete(call._id)}
+                        className="text-red-500 hover:text-red-700 disabled:opacity-50"
+                        disabled={callsLoading}
+                        title="Delete Call"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -113,7 +136,7 @@ export default function CallHistoryTable({ calls, totalPages, currentPage, onPag
             ) : (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="7"
                   className="text-center py-6 text-gray-500 italic text-sm sm:text-base"
                 >
                   No calls found for the selected filter.

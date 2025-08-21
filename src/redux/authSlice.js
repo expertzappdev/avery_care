@@ -1,4 +1,3 @@
-// redux/authSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 let userFromStorage = null;
@@ -28,13 +27,18 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
+    // ✅ Change: Reducer ab direct payload (user object) expect kar raha hai
     loginSuccess: (state, action) => {
       state.loading = false;
-      state.user = action.payload.user;
+      state.user = action.payload; // .user hata diya
       state.isAuthenticated = true;
-      const token = action.payload.user?.token;
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
-      if (token) localStorage.setItem("token", token);
+      console.log(state.isAuthenticated)
+      const token = action.payload?.token; // .user hata diya
+      localStorage.setItem("user", JSON.stringify(action.payload)); // .user hata diya
+
+      if (token) {
+        console.log("token mil gya")
+        localStorage.setItem("token", token)}
     },
     loginFailure: (state, action) => {
       state.loading = false;
@@ -61,12 +65,13 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
+    // ✅ Change: Reducer ab direct payload (user object) expect kar raha hai
     verifyOtpSuccess: (state, action) => {
       state.loading = false;
-      state.user = action.payload.user;
+      state.user = action.payload; // .user hata diya
       state.verified = true;
       state.successMessage = "OTP Verified successfully. Please login now.";
-      localStorage.setItem("user", JSON.stringify(action.payload.user));
+      localStorage.setItem("user", JSON.stringify(action.payload)); // .user hata diya
     },
     verifyOtpFailure: (state, action) => {
       state.loading = false;

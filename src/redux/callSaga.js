@@ -16,10 +16,8 @@ import {
   deleteScheduledCallFailure,
 } from "./callSlice";
 
-// Common API base url
 const API_BASE_URL = "http://localhost:5000/api/calls";
 
-// Helper function to get auth token
 function* getAuthToken() {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -31,7 +29,6 @@ function* getAuthToken() {
   return token;
 }
 
-// Saga for scheduling a health call
 function* scheduleHealthCallSaga(action) {
   try {
     const token = yield call(getAuthToken);
@@ -39,7 +36,7 @@ function* scheduleHealthCallSaga(action) {
 
     const { data } = yield call(
       axios.post,
-      `${API_BASE_URL}/scheduleCall`, // Backend endpoint for scheduling
+      `${API_BASE_URL}/scheduleCall`,
       action.payload,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -50,7 +47,13 @@ function* scheduleHealthCallSaga(action) {
     toast.success(data.message || "Call scheduled successfully ✅");
 
     const { page, limit } = yield select((state) => state.call.scheduledCalls);
-    yield put(fetchScheduledCallsRequest({ page, limit, status: 'pending' }));
+    const currentMemberId = yield select((state) => state.family.selectedFamilyMember?._id);
+    if (currentMemberId) {
+      yield put(fetchScheduledCallsRequest({ page, limit, scheduledToId: currentMemberId }));
+    } else {
+      yield put(fetchScheduledCallsRequest({ page, limit, status: 'pending' }));
+    }
+
   } catch (error) {
     const msg =
       error.response?.data?.message ||
@@ -61,13 +64,13 @@ function* scheduleHealthCallSaga(action) {
   }
 }
 
-// Saga for fetching scheduled calls (with pagination and filters)
 function* fetchScheduledCallsSaga(action) {
   try {
     const token = yield call(getAuthToken);
     if (!token) return;
 
-    const { page, limit, status, recipientName, dateKeyword } = action.payload;
+    // --- CRITICAL: Ensure 'scheduledAt' is destructured here ---
+    const { page, limit, status, recipientName, dateKeyword, scheduledToId, scheduledAt } = action.payload;
 
     const queryParams = new URLSearchParams();
     if (page) queryParams.append("page", page);
@@ -75,6 +78,9 @@ function* fetchScheduledCallsSaga(action) {
     if (status) queryParams.append("status", status);
     if (recipientName) queryParams.append("recipientName", recipientName);
     if (dateKeyword) queryParams.append("dateKeyword", dateKeyword);
+    if (scheduledToId) queryParams.append("scheduledToId", scheduledToId);
+    // --- CRITICAL: Ensure 'scheduledAt' is appended to queryParams ---
+    if (scheduledAt) queryParams.append("scheduledAt", scheduledAt);
 
     const { data } = yield call(
       axios.get,
@@ -92,7 +98,6 @@ function* fetchScheduledCallsSaga(action) {
   }
 }
 
-// Saga for updating a scheduled call
 function* updateScheduledCallSaga(action) {
   try {
     const token = yield call(getAuthToken);
@@ -113,7 +118,13 @@ function* updateScheduledCallSaga(action) {
     toast.success(data.message || "Call updated successfully ✅");
 
     const { page, limit } = yield select((state) => state.call.scheduledCalls);
-    yield put(fetchScheduledCallsRequest({ page, limit, status: 'pending' }));
+    const currentMemberId = yield select((state) => state.family.selectedFamilyMember?._id);
+    if (currentMemberId) {
+      yield put(fetchScheduledCallsRequest({ page, limit, scheduledToId: currentMemberId }));
+    } else {
+      yield put(fetchScheduledCallsRequest({ page, limit, status: 'pending' }));
+    }
+
   } catch (error) {
     const msg = error.response?.data?.message || error.message;
     toast.error(msg);
@@ -121,13 +132,13 @@ function* updateScheduledCallSaga(action) {
   }
 }
 
-// Saga for deleting a scheduled call
 function* deleteScheduledCallSaga(action) {
   try {
     const token = yield call(getAuthToken);
     if (!token) return;
 
-    const callId = action.payload;
+    const { callId, scheduledToId } = action.payload;
+
     const { data } = yield call(
       axios.delete,
       `${API_BASE_URL}/delete-call/${callId}`,
@@ -139,9 +150,14 @@ function* deleteScheduledCallSaga(action) {
 
     toast.success(data.message || "Call deleted successfully 🗑️");
 
-    // FIX: deleted call ke baad dobara completed calls fetch karein
     const { page, limit } = yield select((state) => state.call.scheduledCalls);
-    yield put(fetchScheduledCallsRequest({ page, limit, status: 'completed' }));
+
+    if (scheduledToId) {
+      yield put(fetchScheduledCallsRequest({ page, limit, scheduledToId }));
+    } else {
+      yield put(fetchScheduledCallsRequest({ page, limit, status: 'pending' }));
+    }
+
   } catch (error) {
     const msg = error.response?.data?.message || error.message;
     toast.error(msg);
@@ -149,10 +165,11 @@ function* deleteScheduledCallSaga(action) {
   }
 }
 
-// Watcher saga to listen for actions
-export function* watchCallSagas() {
+function* watchCallSagas() {
   yield takeLatest(scheduleHealthCallRequest.type, scheduleHealthCallSaga);
   yield takeLatest(fetchScheduledCallsRequest.type, fetchScheduledCallsSaga);
   yield takeLatest(updateScheduledCallRequest.type, updateScheduledCallSaga);
   yield takeLatest(deleteScheduledCallRequest.type, deleteScheduledCallSaga);
 }
+
+export { watchCallSagas };

@@ -36,9 +36,18 @@ export default function CallHistory() {
         filters.status = "failed";
       } else if (filterType === "recipientName" && search) {
         filters.recipientName = search;
-      } else if (filterType === "scheduledAtBeetweenStartDate" && search) {
-        filters.scheduledAtBeetweenStartDate = search;
+      } else if (filterType === "scheduledAt" && search) { // This condition must be met
+        filters.scheduledAt = search; // This filter property must be set
       }
+
+      // --- CRITICAL DEBUGGING LOGS ---
+      console.log("---------------------------------------");
+      console.log("Dispatching fetchScheduledCallsRequest...");
+      console.log("Current filterType:", filterType);
+      console.log("Current search value:", search);
+      console.log("Filters object being dispatched:", filters);
+      console.log("---------------------------------------");
+      // --- END CRITICAL DEBUGGING LOGS ---
 
       dispatch(fetchScheduledCallsRequest(filters));
     }
@@ -62,14 +71,20 @@ export default function CallHistory() {
   };
 
   const handleSearchChange = (e) => {
+    // --- DEBUGGING LOG ---
+    console.log("Search input changed to:", e.target.value);
+    // --- END DEBUGGING LOG ---
     setSearch(e.target.value);
     setCurrentPage(1);
   };
 
   const handleFilterTypeChange = (e) => {
+    // --- DEBUGGING LOG ---
+    console.log("Filter type changed to:", e.target.value);
+    // --- END DEBUGGING LOG ---
     setFilterType(e.target.value);
-    setSearch("");
-    setCurrentPage(1);
+    setSearch(""); // Clear search when filter type changes
+    setCurrentPage(1); // Reset to first page
   };
 
   return (
@@ -91,27 +106,24 @@ export default function CallHistory() {
             <option value="completed">Completed</option>
             <option value="failed">Failed</option>
             <option value="recipientName">Recipient Name</option>
-            {/* <option value="scheduledAtBeetweenStartDate">Date</option> */}
+            <option value="scheduledAt">Date</option> {/* Ensure this value is 'scheduledAt' */}
           </select>
 
           <div className="relative flex-grow">
-            {/* {(filterType === "recipientName" || filterType === "scheduledAtBeetweenStartDate") && (
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute top-3 left-3" />
-            )} */}
             <input
-              type="text"
+              type={filterType === "scheduledAt" ? "date" : "text"} 
               placeholder={
                 filterType === "recipientName"
                   ? "Search by Recipient Name"
-                  : filterType === "datscheduledAtBeetweenStartDatee"
-                  ? "Filter by Date (YYYY-MM-DD or August 2025)"
+                  : filterType === "scheduledAt"
+                  ? "Select Date"
                   : "Search disabled for this filter"
               }
-              value={search}
-              onChange={handleSearchChange}
-              disabled={filterType !== "recipientName" && filterType !== "scheduledAtBeetweenStartDate"}
+              value={search} // Input value is tied to the 'search' state
+              onChange={handleSearchChange} // Updates 'search' state
+              disabled={filterType !== "recipientName" && filterType !== "scheduledAt"}
               className={`w-full pl-10 pr-4 py-2 rounded-md bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-green-300 transition ${
-                filterType !== "recipientName" && filterType !== "scheduledAtBeetweenStartDate"
+                (filterType !== "recipientName" && filterType !== "scheduledAt")
                   ? "bg-gray-100 cursor-not-allowed"
                   : ""
               }`}

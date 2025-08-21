@@ -45,14 +45,14 @@ export default function FamilyMemberDetails() {
     }
   }, [dispatch, selectedFamilyMember, member]);
 
-  // Fetch calls specific to this family member with pagination
+  // Fetch all calls specific to this family member with pagination
   useEffect(() => {
-    if (loggedInUserId) {
+    if (loggedInUserId && id) { // Ensure id is available
       dispatch(
         fetchScheduledCallsRequest({
           page: currentPage,
           limit: itemsPerPage,
-          scheduledToId: id,
+          scheduledToId: id, // Fetch calls for this specific family member ID
         })
       );
     }
@@ -65,8 +65,6 @@ export default function FamilyMemberDetails() {
     phone: member?.phone?.replace(/^\+91/, "") || "",
   });
 
-  // FIX: Yeh useEffect ab `member` object ke change hone par `editData` state ko dobara set karega,
-  // jisse component naye data ke saath update ho jayega.
   useEffect(() => {
     if (member) {
       setEditData({
@@ -76,7 +74,7 @@ export default function FamilyMemberDetails() {
         phone: member.phone?.replace(/^\+91/, "") || "",
       });
     }
-  }, [member]);
+  }, [member]); // Dependency on 'member' ensures editData updates if member changes
 
   const handleChange = (e) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
@@ -135,7 +133,7 @@ export default function FamilyMemberDetails() {
           className="mt-4 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition"
         >
           <ArrowLeftIcon className="w-5 h-5" />
-          Back to Family Members
+          Back
         </button>
       </div>
     );
@@ -288,6 +286,7 @@ export default function FamilyMemberDetails() {
             currentPage={currentPage}
             onPageChange={handlePageChange}
             loading={callsLoading}
+            scheduledToId={id} // Pass the family member ID to the table
           />
         )}
         {!callsLoading && !callsError && allFetchedCallsArray.length === 0 && (

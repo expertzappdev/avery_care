@@ -1,4 +1,3 @@
-// redux/authSaga.js
 import { call, put, takeLatest } from "redux-saga/effects";
 import {
   loginRequest, loginSuccess, loginFailure,
@@ -45,10 +44,14 @@ function* loginWorker(action) {
     );
 
     if (response.success) {
-      yield put(loginSuccess({ user: response }));
+      // ✅ Change: API response ko seedha bheja gaya hai
+      console.log("response success")
+      yield put(loginSuccess(response));
       toast.success(response.message || "Login successful ");
     } else {
+      console.log("response failed")
       yield put(loginFailure(response.message || "Invalid credentials."));
+
       toast.error(response.message || "Login failed ❌");
     }
   } catch (error) {
@@ -69,7 +72,8 @@ function* verifyOtpWorker(action) {
     );
 
     if (response.success) {
-      yield put(verifyOtpSuccess({ user: response }));
+      // ✅ Change: API response ko seedha bheja gaya hai (consistency ke liye)
+      yield put(verifyOtpSuccess(response));
       toast.success(response.message || "OTP verified 🎉");
     } else {
       yield put(verifyOtpFailure(response.message || "OTP verification failed."));

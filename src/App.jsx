@@ -24,6 +24,17 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-phone-input-2/lib/style.css";
 import VerifyOtp from "./components/pages/VerifyOtp";
 
+//admin
+import Overview  from "./components/pages/admin/Overview";
+import User from "./components/pages/admin/User";
+import Historycall from "./components/pages/admin/Historycall";
+import Admin from "./components/pages/admin/Admin";
+import AdminDashboard from "./components/pages/admin/AdminDashboard";
+import UserDetail from "./components/pages/admin/UserDetail";
+import Members from "./components/pages/admin/Members";
+import AdminProtectedRoute from "./components/AdminProtectRoute";
+import MemberDetail from "./components/pages/admin/MemberDetail";
+
 function Layout() {
   const location = useLocation();
 
@@ -70,6 +81,20 @@ function Layout() {
               <Route path="/history" element={<ProtectedRoute> <CallHistory /> </ProtectedRoute>} />
               <Route path="/call-details" element={<ProtectedRoute> <CallDetails /> </ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute> <UpdateProfile /> </ProtectedRoute>} />
+
+
+              <Route path="admin-login"  element={<Admin/>}/>
+              <Route path="/admin-dashboard" element={<AdminDashboard />} >
+              <Route index element={<Overview />} />
+              <Route path="users" element={<User/>}/>
+              <Route path="callhistory" element={<Historycall/>}/>
+              
+              <Route path="user/:id" element={<UserDetail/>}/>
+              <Route path="members" element={<Members/>}/>
+              <Route path="members/:id" element={<MemberDetail/>}/>
+
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

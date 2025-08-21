@@ -3,6 +3,8 @@
 import { all } from 'redux-saga/effects';
 import authSaga from './authSaga';
 import familySaga from './familySaga'; //  ADD THIS
+import usersSaga from './userSaga'
+import adminAuthSaga from './adminSaga';
 import { watchCallSagas } from "./callSaga";
 
 export default function* rootSaga() {
@@ -10,5 +12,7 @@ export default function* rootSaga() {
     authSaga(),
     familySaga(), //  ADD THIS
     watchCallSagas(),
+    usersSaga() ,
+    adminAuthSaga(),// ✅ ADD THIS
   ]);
 }

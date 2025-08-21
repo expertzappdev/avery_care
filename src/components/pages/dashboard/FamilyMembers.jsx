@@ -7,7 +7,6 @@ import {
     deleteFamilyMemberRequest,
 } from "../../../redux/familySlice";
 import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
@@ -23,23 +22,22 @@ export default function FamilyMembers() {
         name: "",
         relationship: "",
         email: "",
-        phoneNumber: "+91", // Ensure initial format is correct for PhoneInput
+        phoneNumber: "+91",
     });
 
     const [page, setPage] = useState(1);
-    const limit = 5; // ✅ Adjusted to match saga's default for consistency
+    const limit = 5;
 
     // Fetch members on mount / page change
     useEffect(() => {
         dispatch(fetchFamilyMembersRequest({ page, limit }));
-    }, [dispatch, page, limit]); // Added 'limit' to dependency array
+    }, [dispatch, page, limit]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handlePhoneChange = (value) => {
-        // Ensure the phone number always starts with '+'
         setFormData({
             ...formData,
             phoneNumber: value.startsWith("+") ? value : "+" + value,
@@ -52,15 +50,17 @@ export default function FamilyMembers() {
             !formData.relationship ||
             !formData.email ||
             !formData.phoneNumber ||
-            formData.phoneNumber === "+91" // Check if only country code is entered
+            formData.phoneNumber === "+91"
         ) {
             alert("Please fill in all fields.");
             return;
         }
 
         dispatch(addFamilyMemberRequest(formData));
-        setFormData({ name: "", relationship: "", email: "", phoneNumber: "+91" }); // Reset form
+        setFormData({ name: "", relationship: "", email: "", phoneNumber: "+91" });
     };
+
+
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this family member?")) {
@@ -107,7 +107,7 @@ export default function FamilyMembers() {
                             countryCodeEditable={false}
                             disableDropdown={true}
                             value={formData.phoneNumber}
-                            onChange={handlePhoneChange} // Use the new handler
+                            onChange={handlePhoneChange}
                             inputStyle={{
                                 width: "90%",
                                 marginLeft: "30px",
@@ -123,10 +123,9 @@ export default function FamilyMembers() {
                     <div className="flex justify-center mt-6">
                         <button
                             onClick={handleAddMember}
-                            disabled={loading} // Consider more granular loading states if UX requires
-                            className={`flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base ${
-                                loading ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
+                            disabled={loading}
+                            className={`flex items-center gap-2 px-6 py-2 bg-[#3fbf81] text-white font-medium rounded-full hover:bg-[#36a973] transition text-sm sm:text-base ${loading ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
                         >
                             <UserPlusIcon className="w-5 h-5" />
                             {loading ? "Processing..." : "Add Family Member"}
@@ -142,36 +141,38 @@ export default function FamilyMembers() {
                         Added Family Members
                     </h2>
 
-                    {/* Pagination Controls */}
-                    <div className="flex items-center space-x-4">
-                        <button
-                            disabled={page === 1}
-                            onClick={() => setPage(page - 1)}
-                            className={`p-2 rounded-full ${
-                                page === 1
-                                    ? "opacity-40"
-                                    : "hover:bg-gray-200"
-                            }`}
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
+                    {/* Pagination Controls -- UPDATED SECTION */}
+                    {/* Pagination Controls -- UPDATED SECTION */}
+                    {meta?.total > limit && (
+                        <div className="flex items-center space-x-2">
+                            <button
+                                disabled={page === 1}
+                                onClick={() => setPage(page - 1)}
+                                className={`px-3 py-1 rounded-full text-xl font-bold ${page === 1
+                                    ? "text-gray-400"
+                                    : "text-gray-700 hover:bg-gray-200"
+                                    }`}
+                            >
+                                &laquo;
+                            </button>
 
-                        <span className="text-sm font-medium">
-                            Page {meta?.page || page}
-                        </span>
+                            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                {meta?.page || page} / {Math.ceil(meta?.total / limit) || 1}
+                            </span>
 
-                        <button
-                            disabled={!meta?.hasNextPage}
-                            onClick={() => setPage(page + 1)}
-                            className={`p-2 rounded-full ${
-                                !meta?.hasNextPage
-                                    ? "opacity-40 cursor"
-                                    : "hover:bg-gray-200"
-                            }`}
-                        >
-                            <ChevronRight size={24} />
-                        </button>
-                    </div>
+                            <button
+                                disabled={!meta?.hasNextPage}
+                                onClick={() => setPage(page + 1)}
+                                className={`px-3 py-1 rounded-full text-xl font-bold ${!meta?.hasNextPage
+                                    ? "text-gray-400"
+                                    : "text-gray-700 hover:bg-gray-200"
+                                    }`}
+                            >
+                                &raquo;
+                            </button>
+                        </div>
+                    )}
+
                 </div>
 
                 {loading && familyMembers.length === 0 && (

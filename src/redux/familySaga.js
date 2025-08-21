@@ -23,7 +23,7 @@ const API_BASE_URL = "http://localhost:5000/api/family";
 function* fetchFamilyMembersSaga(action) {
     try {
         const token = yield select(selectAuthToken);
-        const { page = 1, limit = 10 } = action.payload || {}; // Default page/limit
+        const { page = 1, limit = 5 } = action.payload || {}; // Default page/limit
 
         const config = {
             headers: { Authorization: `Bearer ${token}` },
@@ -62,7 +62,7 @@ function* addFamilyMemberSaga(action) {
         yield put(addFamilyMemberSuccess());
         // Re-fetch family members from page 1 to ensure the new member appears
         // and pagination is reset correctly if needed.
-        yield put(fetchFamilyMembersRequest({ page: 1, limit: 10 })); // Adjust limit if needed
+        yield put(fetchFamilyMembersRequest({ page: 1, limit: 5 })); // Adjust limit if needed
         toast.success(res.data?.message || "Family member added successfully!");
     } catch (err) {
         const msg =
@@ -83,7 +83,7 @@ function* deleteFamilyMemberSaga(action) {
         );
         yield put(deleteFamilyMemberSuccess());
         // Re-fetch family members after deletion
-        yield put(fetchFamilyMembersRequest({ page: 1, limit: 10 })); // Adjust limit if needed
+        yield put(fetchFamilyMembersRequest({ page: 1, limit: 5 })); // Adjust limit if needed
         toast.success(res.data?.message || "Family member deleted successfully!");
     } catch (err) {
         const msg =

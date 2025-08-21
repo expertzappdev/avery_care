@@ -7,7 +7,7 @@ import {
   PhoneArrowUpRightIcon,
   PencilSquareIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline"; // Other icons are used here
+} from "@heroicons/react/24/outline";
 
 import { toast } from "react-toastify";
 
@@ -27,8 +27,8 @@ export default function ScheduleHealthCall() {
   const [editingId, setEditingId] = useState(null);
   const [editedDate, setEditedDate] = useState("");
   const [editedTime, setEditedTime] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
-  const [itemsPerPage] = useState(5); // State for items per page (fixed for now)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   const dispatch = useDispatch();
   const { familyMembers } = useSelector((state) => state.family);
@@ -38,48 +38,38 @@ export default function ScheduleHealthCall() {
     (state) => state.call
   );
 
-  // Ensure scheduledCalls.data is always an array
   const allFetchedCalls = Array.isArray(scheduledCalls?.data) ? scheduledCalls.data : [];
-  const totalCalls = scheduledCalls?.total || 0; // Get total from backend response
+  const totalCalls = scheduledCalls?.total || 0;
 
-  // Filter for ONLY pending calls to display on this specific page (from the currently fetched page data)
   const pendingCallsArray = allFetchedCalls.filter(
     (call) => call.status === "pending"
   );
 
-  // Combine user and family members for the dropdown
   const allMembers = [
     ...(user?.name ? [{ _id: user._id, name: user.name }] : []),
     ...(familyMembers || []),
   ];
 
-  // --- Logic to prevent past date/time selection ---
   const now = new Date();
-  const todayDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
-  const nowTime = now.toTimeString().slice(0, 5); // HH:MM
+  const todayDate = now.toISOString().split("T")[0];
+  const nowTime = now.toTimeString().slice(0, 5);
 
   const minTimeForToday = selectedDate === todayDate ? nowTime : "00:00";
-  // --- End of logic ---
 
-  // Fetch family members on component mount
   useEffect(() => {
     dispatch(fetchFamilyMembersRequest());
   }, [dispatch]);
 
-  // Fetch scheduled calls whenever user, currentPage, or itemsPerPage changes
   useEffect(() => {
     if (user?._id) {
-      // Pass pagination parameters to the fetch request.
-      // The scheduledBy filter is handled by the protect middleware on the backend.
       dispatch(fetchScheduledCallsRequest({
         page: currentPage,
         limit: itemsPerPage,
-        status: 'pending' // Only fetch pending calls for this view
+        status: 'pending'
       }));
     }
   }, [dispatch, user, currentPage, itemsPerPage]);
 
-  // Handle Redux error and success messages with toasts
   useEffect(() => {
     if (error) {
       toast.error(`❌ Error: ${error}`);
@@ -91,14 +81,12 @@ export default function ScheduleHealthCall() {
     }
   }, [error, message, dispatch]);
 
-  // Handler for scheduling a new call
   const handleSchedule = () => {
     if (!selectedMember || !selectedDate || !selectedTime) {
       toast.error("⚠️ Please fill all fields before scheduling.");
       return;
     }
 
-    // Final validation to block scheduling calls in the past
     const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
     if (selectedDateTime < now) {
       toast.error("⚠️ You cannot schedule a call in the past.");
@@ -131,17 +119,14 @@ export default function ScheduleHealthCall() {
       toast.error("⚠️ Please select a valid family member from the list.");
     }
 
-    // Clear form fields after scheduling attempt
     setSelectedMember("");
     setSelectedDate("");
     setSelectedTime("");
   };
 
-  // Handler for opening/closing edit mode for a scheduled call
   const handleEdit = (callId, currentScheduledAt) => {
     setEditingId(editingId === callId ? null : callId);
     if (editingId !== callId) {
-      // Populate edit fields with current call data
       const date = new Date(currentScheduledAt);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -153,7 +138,6 @@ export default function ScheduleHealthCall() {
     }
   };
 
-  // Handler for updating a scheduled call
   const handleUpdate = (callId) => {
     if (!editedDate || !editedTime) {
       toast.error("⚠️ Please select new date and time for update.");
@@ -164,23 +148,21 @@ export default function ScheduleHealthCall() {
     dispatch(
       updateScheduledCallRequest({ id: callId, scheduledAt: newScheduledAt })
     );
-    setEditingId(null); // Exit editing mode
+    setEditingId(null);
   };
 
-  // Handler for deleting a scheduled call
+  // CORRECTED: The payload must be an object with a callId property.
   const handleDelete = (callId) => {
     if (window.confirm("Are you sure you want to delete this scheduled call?")) {
-      dispatch(deleteScheduledCallRequest(callId));
+      dispatch(deleteScheduledCallRequest({ callId }));
     }
   };
 
-  // Utility function to format date
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-GB");
   };
 
-  // Utility function to format time
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleTimeString("en-US", {
@@ -190,10 +172,8 @@ export default function ScheduleHealthCall() {
     });
   };
 
-  // Calculate total pages for pagination
   const totalPages = Math.ceil(totalCalls / itemsPerPage);
 
-  // Handle pagination page changes
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= totalPages) {
       setCurrentPage(newPage);
@@ -202,7 +182,6 @@ export default function ScheduleHealthCall() {
 
   return (
     <div className="flex flex-col sm:px-8 lg:px-12 pb-12 min-h-screen space-y-12">
-      {/* Page Title */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
           Schedule Health Call
@@ -214,9 +193,7 @@ export default function ScheduleHealthCall() {
         </p>
       </div>
 
-      {/* Form Section for Scheduling New Calls */}
       <div className="max-w-2xl space-y-8">
-        {/* Member Dropdown */}
         <div>
           <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
             <UserIcon className="w-5 h-5 text-[#3fbf81]" />
@@ -236,7 +213,6 @@ export default function ScheduleHealthCall() {
           </select>
         </div>
 
-        {/* Date Picker */}
         <div>
           <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
             <CalendarDaysIcon className="w-5 h-5 text-[#3fbf81]" />
@@ -247,11 +223,10 @@ export default function ScheduleHealthCall() {
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
-            min={todayDate} // <-- Added min attribute for today's date
+            min={todayDate}
           />
         </div>
 
-        {/* Time Picker */}
         <div>
           <label className="font-medium mb-2 text-gray-700 flex items-center gap-2">
             <ClockIcon className="w-5 h-5 text-[#3fbf81]" />
@@ -262,11 +237,10 @@ export default function ScheduleHealthCall() {
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
             className="w-full rounded-md px-4 py-2 bg-white border border-gray-300 outline-none focus:ring-2 focus:ring-[#3fbf81] focus:border-[#3fbf81] transition"
-            min={minTimeForToday} // <-- Added conditional min attribute for time
+            min={minTimeForToday}
           />
         </div>
 
-        {/* Schedule Button */}
         <div className="flex justify-center mt-6">
           <button
             onClick={handleSchedule}
@@ -279,20 +253,18 @@ export default function ScheduleHealthCall() {
         </div>
       </div>
 
-      {/* Section for Upcoming Pending Calls */}
       <div className="max-w-2xl mt-0">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Upcoming Pending Calls</h2>{" "}
-          {/* Pagination Controls moved here */}
+          <h2 className="text-xl font-semibold">Upcoming Pending Calls</h2>
           {totalPages > 1 && (
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1 || loading}
-                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 font-bold text-lg leading-none" // Added text styles
+                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 font-bold text-lg leading-none"
                 title="Previous Page"
               >
-                &laquo; {/* Unicode left arrow */}
+                &laquo;
               </button>
               <span className="text-gray-700 text-sm font-medium">
                 {currentPage} / {totalPages}
@@ -300,10 +272,10 @@ export default function ScheduleHealthCall() {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || loading}
-                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 font-bold text-lg leading-none" // Added text styles
+                className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-700 font-bold text-lg leading-none"
                 title="Next Page"
               >
-                &raquo; {/* Unicode right arrow */}
+                &raquo;
               </button>
             </div>
           )}

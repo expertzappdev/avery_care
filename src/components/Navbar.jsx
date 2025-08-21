@@ -55,8 +55,8 @@ const Navbar = () => {
         </h2>
       </Link>
 
-      {/* Desktop Navigation (md and up) */}
-      <div className="hidden md:flex flex-1 justify-end gap-8 items-center">
+      {/* Desktop Navigation (xl and up) */}
+      <div className="hidden xl:flex flex-1 justify-end gap-8 items-center">
         {isAuthenticated ? (
           <>
             {/* Search Bar */}
@@ -131,8 +131,8 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Mobile Menu Button (below md) */}
-      <div className="md:hidden">
+      {/* Mobile Menu Button (below xl) */}
+      <div className="xl:hidden">
         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="focus:outline-none">
           {isMenuOpen ? <XMarkIcon className="w-7 h-7" /> : <Bars3Icon className="w-7 h-7" />}
         </button>
@@ -140,7 +140,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (
-        <div className="absolute top-14 right-4 w-[240px] bg-white rounded-xl shadow-lg border border-gray-200 p-4 flex flex-col gap-2 md:hidden text-left">
+        <div className="absolute top-14 right-4 w-[240px] bg-white rounded-xl shadow-lg border border-gray-200 p-4 flex flex-col gap-2 xl:hidden text-left">
           {isAuthenticated ? (
             <>
               {navItems.map((item) => (
