@@ -26,7 +26,7 @@ const SettingsPage = () => {
   const [openSection, setOpenSection] = useState(null);
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { familyMembers } = useSelector((state) => state.family);
+  const { familyMembers, meta } = useSelector((state) => state.family);
   const { scheduledCalls, loading: callsLoading, error: callsError } = useSelector(
     (state) => state.call
   );
@@ -34,7 +34,7 @@ const SettingsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
-  const familyCount = familyMembers?.length || 0;
+  const familyCount = meta?.total || 0;
 
   useEffect(() => {
     dispatch(fetchFamilyMembersRequest());
