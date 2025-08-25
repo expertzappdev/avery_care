@@ -17,7 +17,7 @@ import {
 import { toast } from "react-toastify";
 
 const selectAuthToken = (state) => state.auth.user?.token;
-const API_BASE_URL = "http://localhost:5000/api/family";
+const API_BASE_URL = "https://avery-care-backend-3.onrender.com/api/family";
 
 // Fetch
 function* fetchFamilyMembersSaga(action) {
