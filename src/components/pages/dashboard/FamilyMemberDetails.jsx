@@ -253,25 +253,25 @@ export default function FamilyMemberDetails() {
           <h2 className="text-lg font-semibold text-gray-800">Call History</h2>
           {totalPages > 1 && (
             <div className="flex items-center space-x-2">
-              <button
+              {/* <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1 || callsLoading}
                 className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                 title="Previous Page"
               >
                 <ArrowLeftIcon className="w-4 h-4 text-gray-700" />
-              </button>
-              <span className="text-gray-700 text-sm font-medium">
+              </button> */}
+              {/* <span className="text-gray-700 text-sm font-medium">
                 {currentPage} / {totalPages}
-              </span>
-              <button
+              </span> */}
+              {/* <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || callsLoading}
                 className="p-1 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
                 title="Next Page"
               >
                 <ArrowRightIcon className="w-4 h-4 text-gray-700" />
-              </button>
+              </button> */}
             </div>
           )}
         </div>
